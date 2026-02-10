@@ -4,34 +4,25 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#0b1020" />
-  <title>Ready 助手（PWA）</title>
+  <title>Ready 助手（V1 等价）</title>
   <style>
     :root{
-      --bg:#0b1020;
-      --bg2:#070a14;
+      --bg:#0b1020; --bg2:#070a14;
       --card: rgba(18,26,51,.92);
-      --card2: rgba(255,255,255,.06);
-      --text:#e8ecff;
-      --muted:#a9b2d6;
+      --text:#e8ecff; --muted:#a9b2d6;
       --line: rgba(255,255,255,.10);
-      --ok:#6ef2b6;
-      --warn:#ffd27a;
-      --bad:#ff8a8a;
-      --btn1:#2b3a75;
-      --btn2:#1e2a55;
+      --ok:#6ef2b6; --warn:#ffd27a; --bad:#ff8a8a;
+      --btn1:#2b3a75; --btn2:#1e2a55;
       --shadow: 0 10px 30px rgba(0,0,0,.28);
       --radius: 16px;
     }
     *{ box-sizing:border-box; }
-    html,body{ height:100%; }
     body{
-      margin:0;
-      font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+      margin:0; font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
       background: linear-gradient(180deg,var(--bg),var(--bg2));
       color:var(--text);
     }
-    a{ color:inherit; }
-    .container{ max-width: 980px; margin:0 auto; padding: 14px; }
+    .container{ max-width: 1080px; margin:0 auto; padding: 14px; }
     .topbar{
       position: sticky; top:0; z-index:50;
       background: rgba(11,16,32,.78);
@@ -40,15 +31,13 @@
     }
     .topbar-inner{
       display:flex; align-items:center; justify-content:space-between;
-      gap:12px;
-      padding: 12px 14px;
-      max-width: 980px;
-      margin: 0 auto;
+      gap:12px; padding: 12px 14px;
+      max-width: 1080px; margin: 0 auto;
     }
     .brand{ display:flex; flex-direction:column; gap:2px; }
     .brand .title{ font-weight: 900; letter-spacing:.2px; font-size: 16px; }
     .brand .subtitle{ color: var(--muted); font-size: 12px; }
-    .row{ display:flex; gap:10px; flex-wrap:wrap; }
+    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
     .btn{
       border: 1px solid var(--line);
       background: linear-gradient(180deg,var(--btn1),var(--btn2));
@@ -61,13 +50,8 @@
       box-shadow: 0 8px 20px rgba(0,0,0,.20);
       user-select:none;
     }
-    .btn.ghost{
-      background: rgba(255,255,255,.05);
-      box-shadow:none;
-    }
-    .btn.danger{
-      background: rgba(255,80,80,.14);
-    }
+    .btn.ghost{ background: rgba(255,255,255,.05); box-shadow:none; }
+    .btn.danger{ background: rgba(255,80,80,.14); }
     .btn:active{ transform: translateY(1px); }
     .card{
       background: var(--card);
@@ -77,26 +61,15 @@
       box-shadow: var(--shadow);
       margin-top: 14px;
     }
-    .card h3{
-      margin:0 0 8px 0;
-      font-size: 14px;
-      letter-spacing:.2px;
-    }
-    .hint{
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.55;
-    }
+    .card h3{ margin:0 0 8px 0; font-size: 14px; letter-spacing:.2px; }
+    .hint{ color: var(--muted); font-size: 12px; line-height: 1.55; }
     .grid{
       display:grid;
       grid-template-columns: repeat(12, 1fr);
       gap: 10px;
       margin-top: 10px;
     }
-    .field{
-      grid-column: span 6;
-      display:flex; flex-direction:column; gap:6px;
-    }
+    .field{ grid-column: span 6; display:flex; flex-direction:column; gap:6px; }
     .field.small{ grid-column: span 4; }
     .field.tiny{ grid-column: span 3; }
     .label{ font-size: 12px; color: var(--muted); }
@@ -119,7 +92,7 @@
       margin-top: 10px;
     }
     .kpi{
-      grid-column: span 6;
+      grid-column: span 4;
       background: rgba(255,255,255,.05);
       border:1px solid var(--line);
       border-radius: 14px;
@@ -142,7 +115,7 @@
       border: 1px solid var(--line);
       background: rgba(255,255,255,.03);
     }
-    table{ border-collapse: collapse; width:100%; font-size: 13px; min-width: 980px; }
+    table{ border-collapse: collapse; width:100%; font-size: 13px; min-width: 1300px; }
     th,td{
       border: 1px solid rgba(255,255,255,.08);
       padding: 8px 10px;
@@ -157,10 +130,7 @@
       font-size: 12px;
       color: var(--muted);
     }
-    td[contenteditable="true"]{
-      background: rgba(255,255,255,.04);
-      cursor: text;
-    }
+    td[contenteditable="true"]{ background: rgba(255,255,255,.04); cursor: text; }
     .pill{
       display:inline-flex; align-items:center; gap:6px;
       padding: 4px 10px; border-radius: 999px;
@@ -169,15 +139,14 @@
       font-size: 12px;
       color: var(--muted);
     }
-    .min-ok{ color: var(--ok); font-weight: 800; }
-    .min-warn{ color: var(--warn); font-weight: 800; }
-    .min-bad{ color: var(--bad); font-weight: 800; }
-    .footer-note{ margin: 14px 0 30px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+    .min-ok{ color: var(--ok); font-weight: 900; }
+    .min-warn{ color: var(--warn); font-weight: 900; }
+    .min-bad{ color: var(--bad); font-weight: 900; }
     @media (max-width: 720px){
       .field{ grid-column: span 12; }
       .field.small, .field.tiny{ grid-column: span 12; }
       .kpi{ grid-column: span 12; }
-      table{ min-width: 860px; }
+      table{ min-width: 1100px; }
     }
   </style>
 </head>
@@ -186,8 +155,8 @@
   <div class="topbar">
     <div class="topbar-inner">
       <div class="brand">
-        <div class="title">Ready 助手 <span class="badge">PWA</span></div>
-        <div class="subtitle">数据只保存在本机浏览器（localStorage），不会上传到服务器</div>
+        <div class="title">Ready 助手 <span class="badge">V1 等价</span></div>
+        <div class="subtitle">数据仅保存在本机浏览器（localStorage），不上传服务器</div>
       </div>
       <div class="row">
         <button class="btn ghost" id="btnExport">导出JSON</button>
@@ -200,47 +169,47 @@
   <div class="container">
 
     <div class="card">
-      <h3>汇率设置</h3>
+      <h3>汇率 / 参数（对齐 Excel V1）</h3>
       <div class="grid">
         <div class="field small">
-          <div class="label">USDC/CNY（1 USDC = ? CNY）</div>
-          <input class="input" id="rateUsdcCny" type="number" step="0.0001" placeholder="例如 7.20" />
+          <div class="label">M JPY/U（每 10000 JPY = ? USDC）</div>
+          <input class="input" id="mJpyPer10kUsdc" type="number" step="0.0001" />
         </div>
         <div class="field small">
-          <div class="label">Ready 返现（%）</div>
-          <input class="input" id="readyCashback" type="number" step="0.01" placeholder="例如 1.50" />
+          <div class="label">M JPY/R（每 10000 JPY = ? RMB）</div>
+          <input class="input" id="mJpyPer10kRmb" type="number" step="0.0001" />
         </div>
         <div class="field small">
-          <div class="label">消费税（%）</div>
-          <input class="input" id="taxRate" type="number" step="0.01" placeholder="例如 10" />
+          <div class="label">Z JPY/R（每 10000 JPY = ? RMB）</div>
+          <input class="input" id="zJpyPer10kRmb" type="number" step="0.0001" />
+        </div>
+        <div class="field small">
+          <div class="label">V JPY/R（每 10000 JPY = ? RMB）</div>
+          <input class="input" id="vJpyPer10kRmb" type="number" step="0.0001" />
+        </div>
+        <div class="field small">
+          <div class="label">USDT/CNY（C9）</div>
+          <input class="input" id="usdtCny" type="number" step="0.0001" />
+        </div>
+        <div class="field small">
+          <div class="label">USDC/CNY（自动 = USDT/CNY /0.9986/0.9945）</div>
+          <input class="input" id="usdcCny" type="number" step="0.0001" disabled />
+        </div>
+        <div class="field small">
+          <div class="label">Cashback（Ready，比例）</div>
+          <input class="input" id="cashbackRate" type="number" step="0.0001" />
+        </div>
+        <div class="field small">
+          <div class="label">免税除数（默认 1.1）</div>
+          <input class="input" id="taxDivisor" type="number" step="0.0001" />
+        </div>
+        <div class="field small">
+          <div class="label">SELL JPY/R（每 10000 JPY = ? RMB）</div>
+          <input class="input" id="sellJpyPer10kRmb" type="number" step="0.0001" />
         </div>
       </div>
       <div class="hint" style="margin-top:10px;">
-        说明：免税 = YES 时，会按 <code>价格 / (1 + 税率)</code> 去掉税（与你之前的 Excel 逻辑一致）。
-        返现会按 Ready 成本的百分比抵扣。
-      </div>
-      <div class="hr"></div>
-      <div class="hint">
-        下面的“平台成本”模型做成可调：你可以按自己的 Excel 规则把费率填进去（默认给一个通用值）。
-        <br/>如你愿意，我也可以把你 Excel 的具体公式（Ready/VX/ZFB/Master 的计算方式）复刻到这里，让输出与 Excel 完全一致。
-      </div>
-      <div class="grid">
-        <div class="field tiny">
-          <div class="label">VX 手续费（%）</div>
-          <input class="input" id="feeVX" type="number" step="0.01" placeholder="例如 0" />
-        </div>
-        <div class="field tiny">
-          <div class="label">ZFB 手续费（%）</div>
-          <input class="input" id="feeZFB" type="number" step="0.01" placeholder="例如 0" />
-        </div>
-        <div class="field tiny">
-          <div class="label">Master 手续费（%）</div>
-          <input class="input" id="feeMaster" type="number" step="0.01" placeholder="例如 1.8" />
-        </div>
-        <div class="field tiny">
-          <div class="label">JPY→CNY（每 10000 JPY = ? CNY）</div>
-          <input class="input" id="jpyToCny10k" type="number" step="0.0001" placeholder="例如 480" />
-        </div>
+        折扣幅度请按 Excel：例如 0.85（不是 85%）。免税 YES 时按 <code>/ 1.1</code>（默认）。
       </div>
     </div>
 
@@ -248,9 +217,9 @@
       <h3>添加商品</h3>
       <div class="grid">
         <div class="field small">
-          <div class="label">平台</div>
+          <div class="label">平台（仅记录；最优解按四平台自动比较）</div>
           <select class="select" id="platform">
-            <option value="Auto">Auto（每行最优）</option>
+            <option value="">（可空）</option>
             <option value="Ready">Ready</option>
             <option value="VX">VX</option>
             <option value="ZFB">ZFB</option>
@@ -259,7 +228,7 @@
         </div>
         <div class="field">
           <div class="label">商品名</div>
-          <input class="input" id="name" placeholder="例如 Just ear / 耳机配件…" />
+          <input class="input" id="name" placeholder="例如 耳机 / 配件…" />
         </div>
         <div class="field small">
           <div class="label">JPY（单价）</div>
@@ -270,37 +239,36 @@
           <input class="input" id="qty" type="number" step="1" placeholder="1" />
         </div>
         <div class="field tiny">
-          <div class="label">折扣幅度（%）</div>
-          <input class="input" id="discount" type="number" step="0.01" placeholder="例如 5" />
+          <div class="label">折扣幅度（系数）</div>
+          <input class="input" id="discountFactor" type="number" step="0.0001" placeholder="例如 0.85" />
         </div>
         <div class="field tiny">
-          <div class="label">免税</div>
+          <div class="label">是否免税</div>
           <select class="select" id="taxFree">
-            <option value="YES">YES</option>
             <option value="NO" selected>NO</option>
+            <option value="YES">YES</option>
           </select>
         </div>
       </div>
       <div class="row" style="margin-top:12px;">
         <button class="btn" id="btnAdd">添加</button>
-        <button class="btn ghost" id="btnImportExcel">从 Excel 导入（可选）</button>
+        <button class="btn ghost" id="btnImportExcel">从 Excel 导入</button>
         <input id="excelFile" type="file" accept=".xlsx,.xls" style="display:none;" />
       </div>
       <div class="hint" style="margin-top:10px;">
-        Excel 导入：默认读取第 1 个 Sheet。若表头包含：<code>平台</code> <code>商品名</code> <code>JPY</code> <code>数量</code> <code>折扣幅度</code> <code>免税</code>，会自动映射。
-        表头不一致也没关系：你导入后可以在表格里直接改（自动保存）。
+        Excel 导入：读取第 1 个 Sheet。若表头包含：<code>平台</code> <code>商品名</code> <code>JPY</code> <code>数量</code> <code>折扣幅度</code> <code>是否免税</code>，会自动映射。
       </div>
     </div>
 
     <div class="card">
-      <h3>商品清单 <span class="badge">点击表格内数值可直接编辑（自动保存）</span></h3>
+      <h3>清单 <span class="badge">点击单元格可编辑（自动保存）</span></h3>
 
       <div class="kpi-grid" id="kpis"></div>
 
       <div class="hr"></div>
 
       <div class="table-wrap">
-        <table id="tbl">
+        <table>
           <thead>
           <tr>
             <th>#</th>
@@ -308,14 +276,19 @@
             <th>商品名</th>
             <th>JPY</th>
             <th>数量</th>
-            <th>折扣%</th>
+            <th>折扣幅度</th>
             <th>免税</th>
-            <th>Ready</th>
-            <th>VX</th>
-            <th>ZFB</th>
-            <th>Master</th>
-            <th>最优</th>
-            <th>最优平台</th>
+            <th>JPY/折扣</th>
+            <th>JPY/免税</th>
+            <th>Total/Ready</th>
+            <th>RMB/VX</th>
+            <th>RMB/ZFB</th>
+            <th>RMB/Master</th>
+            <th>最优价格</th>
+            <th>最优解</th>
+            <th>RMB/SELL</th>
+            <th>PROFIT</th>
+            <th>原价/Master</th>
             <th>操作</th>
           </tr>
           </thead>
@@ -323,32 +296,30 @@
         </table>
       </div>
 
-      <div class="footer-note">
-        iPhone 安装：Safari → 分享 → 添加到主屏幕。<br/>
-        注意：这里的“平台成本公式”目前是通用模型（折扣/免税/手续费/返现/汇率）。如果你把你 Excel 里 Ready/VX/ZFB/Master 的具体计算规则贴出来，我可以把这里改成与你 Excel 完全一致的结果。
+      <div class="hint" style="margin-top:12px;">
+        最优解规则与 Excel 一致：在 Ready/VX/ZFB/Master 中取最小值，若并列则按 Ready→VX→ZFB→Master 的优先级输出。
       </div>
     </div>
 
   </div>
 
-  <!-- SheetJS：用稳定版本，避免 “version not found” -->
+  <!-- SheetJS：稳定版本 -->
   <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <script>
-    // -------------------------
-    // Storage
-    // -------------------------
-    const KEY = "ready_pwa_state_v1";
+    const KEY = "ready_v1_state_v1";
 
     const defaultState = () => ({
       settings: {
-        rateUsdcCny: 7.2,
-        readyCashback: 1.5,
-        taxRate: 10,
-        feeVX: 0,
-        feeZFB: 0,
-        feeMaster: 1.8,
-        jpyToCny10k: 480
+        // Excel V1 默认值
+        mJpyPer10kUsdc: 63.9,     // C2
+        mJpyPer10kRmb: 443.49,    // C3
+        zJpyPer10kRmb: 444.65,    // C4
+        vJpyPer10kRmb: 443.86,    // C5
+        usdtCny: 6.97,            // C9
+        cashbackRate: 0.03,       // P = O*0.03
+        taxDivisor: 1.1,          // /1.1
+        sellJpyPer10kRmb: 500     // C8
       },
       items: []
     });
@@ -367,151 +338,131 @@
       }
     }
 
-    function saveState(){
-      localStorage.setItem(KEY, JSON.stringify(state));
-    }
-
     let state = loadState();
 
-    // -------------------------
-    // Helpers
-    // -------------------------
+    function saveState(){ localStorage.setItem(KEY, JSON.stringify(state)); }
+
     const $ = (id) => document.getElementById(id);
+    const n = (v, def=0) => { const x = Number(v); return Number.isFinite(x) ? x : def; };
+    const esc = (s)=> String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    const fmt = (x)=> Number.isFinite(x) ? x.toFixed(2) : "";
 
-    function n(v, def=0){
-      const x = Number(v);
-      return Number.isFinite(x) ? x : def;
+    function calcUsdcCny(s){
+      // Excel: =C9/0.9986/0.9945
+      return n(s.usdtCny,0) / 0.9986 / 0.9945;
     }
 
-    function fmtCny(x){
-      if(!Number.isFinite(x)) return "-";
-      return x.toFixed(2);
-    }
+    function calcRow(it, s){
+      const jpy = n(it.jpy, 0);
+      const qty = Math.max(1, n(it.qty, 1));
+      const disc = n(it.discountFactor, 1);     // Excel: 0.85
+      const taxFree = String(it.taxFree||"NO").toUpperCase() === "YES";
 
-    function calcRowCosts(item, settings){
-      // base JPY after qty & discount
-      const jpy = n(item.jpy);
-      const qty = Math.max(1, n(item.qty, 1));
-      const disc = Math.max(0, n(item.discount, 0)) / 100;
+      // L: JPY/折扣
+      const jpyDiscount = jpy * disc * qty;
 
-      let gross = jpy * qty * (1 - disc);
+      // M: JPY/免税
+      const taxDiv = Math.max(1e-9, n(s.taxDivisor, 1.1));
+      const jpyTax = taxFree ? (jpyDiscount / taxDiv) : jpyDiscount;
 
-      // tax-free removes tax by / (1 + taxRate)
-      const taxRate = Math.max(0, n(settings.taxRate, 0)) / 100;
-      if(String(item.taxFree).toUpperCase() === "YES"){
-        gross = gross / (1 + taxRate);
-      }
+      // Ready: N= M * (C2/10000), O= N * USDC/CNY, P=O*0.03, Q=O-P
+      const usdcCny = calcUsdcCny(s);
+      const usdcM = jpyTax * (n(s.mJpyPer10kUsdc,0) / 10000);
+      const rmbU = usdcM * usdcCny;
+      const cashback = rmbU * n(s.cashbackRate,0);
+      const ready = rmbU - cashback;
 
-      // Convert JPY -> CNY using (per 10000 JPY = ? CNY)
-      const jpyToCny10k = Math.max(0, n(settings.jpyToCny10k, 0));
-      const baseCny = (gross / 10000) * jpyToCny10k;
+      // VX/ZFB/Master
+      const vx = jpyTax * (n(s.vJpyPer10kRmb,0) / 10000);
+      const zfb = jpyTax * (n(s.zJpyPer10kRmb,0) / 10000);
+      const master = jpyTax * (n(s.mJpyPer10kRmb,0) / 10000);
 
-      // Fees
-      const feeVX = Math.max(0, n(settings.feeVX, 0)) / 100;
-      const feeZFB = Math.max(0, n(settings.feeZFB, 0)) / 100;
-      const feeMaster = Math.max(0, n(settings.feeMaster, 0)) / 100;
-
-      // Ready: assume pay via USDC -> CNY with cashback (model can be adjusted)
-      // We use baseCny as reference, then apply cashback as discount (reduce cost)
-      const cashback = Math.max(0, n(settings.readyCashback, 0)) / 100;
-      const ready = baseCny * (1 - cashback);
-
-      const vx = baseCny * (1 + feeVX);
-      const zfb = baseCny * (1 + feeZFB);
-      const master = baseCny * (1 + feeMaster);
-
+      // 最优价格 & 最优解（并列优先级 Ready->VX->ZFB->Master）
       const min = Math.min(ready, vx, zfb, master);
-      let minLabel = "Ready";
-      if(min === vx) minLabel = "VX";
-      if(min === zfb) minLabel = "ZFB";
-      if(min === master) minLabel = "Master";
+      let minLabel = "Master";
+      if (ready === min) minLabel = "Ready";
+      else if (vx === min) minLabel = "VX";
+      else if (zfb === min) minLabel = "ZFB";
+      else minLabel = "Master";
 
-      return { baseCny, ready, vx, zfb, master, min, minLabel };
+      // SELL: W = 原价 JPY * SELL rate * qty（不吃折扣/免税）
+      const sell = jpy * (n(s.sellJpyPer10kRmb,0) / 10000) * qty;
+
+      // PROFIT: X = W - V(min)
+      const profit = sell - min;
+
+      // 原价/Master: Y = 原价 JPY * master rate * qty（不吃折扣/免税）
+      const originMaster = jpy * (n(s.mJpyPer10kRmb,0) / 10000) * qty;
+
+      return { jpyDiscount, jpyTax, ready, vx, zfb, master, min, minLabel, sell, profit, originMaster, usdcCny };
     }
 
-    function esc(s){
-      return String(s ?? "").replace(/[&<>"']/g, (c) => ({
-        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-      }[c]));
-    }
-
-    // -------------------------
-    // Bind settings inputs
-    // -------------------------
     function syncSettingsToUI(){
       const s = state.settings;
-      $("rateUsdcCny").value = s.rateUsdcCny;
-      $("readyCashback").value = s.readyCashback;
-      $("taxRate").value = s.taxRate;
-      $("feeVX").value = s.feeVX;
-      $("feeZFB").value = s.feeZFB;
-      $("feeMaster").value = s.feeMaster;
-      $("jpyToCny10k").value = s.jpyToCny10k;
+      $("mJpyPer10kUsdc").value = s.mJpyPer10kUsdc;
+      $("mJpyPer10kRmb").value  = s.mJpyPer10kRmb;
+      $("zJpyPer10kRmb").value  = s.zJpyPer10kRmb;
+      $("vJpyPer10kRmb").value  = s.vJpyPer10kRmb;
+      $("usdtCny").value        = s.usdtCny;
+      $("cashbackRate").value   = s.cashbackRate;
+      $("taxDivisor").value     = s.taxDivisor;
+      $("sellJpyPer10kRmb").value = s.sellJpyPer10kRmb;
+      $("usdcCny").value = calcUsdcCny(s).toFixed(6);
     }
 
     function syncUIToSettings(){
-      state.settings.rateUsdcCny = n($("rateUsdcCny").value, 0);
-      state.settings.readyCashback = n($("readyCashback").value, 0);
-      state.settings.taxRate = n($("taxRate").value, 0);
-      state.settings.feeVX = n($("feeVX").value, 0);
-      state.settings.feeZFB = n($("feeZFB").value, 0);
-      state.settings.feeMaster = n($("feeMaster").value, 0);
-      state.settings.jpyToCny10k = n($("jpyToCny10k").value, 0);
+      const s = state.settings;
+      s.mJpyPer10kUsdc = n($("mJpyPer10kUsdc").value, 0);
+      s.mJpyPer10kRmb  = n($("mJpyPer10kRmb").value, 0);
+      s.zJpyPer10kRmb  = n($("zJpyPer10kRmb").value, 0);
+      s.vJpyPer10kRmb  = n($("vJpyPer10kRmb").value, 0);
+      s.usdtCny        = n($("usdtCny").value, 0);
+      s.cashbackRate   = n($("cashbackRate").value, 0);
+      s.taxDivisor     = n($("taxDivisor").value, 1.1);
+      s.sellJpyPer10kRmb = n($("sellJpyPer10kRmb").value, 0);
+
+      $("usdcCny").value = calcUsdcCny(s).toFixed(6);
       saveState();
       render();
     }
 
-    ["rateUsdcCny","readyCashback","taxRate","feeVX","feeZFB","feeMaster","jpyToCny10k"].forEach(id=>{
-      $(id).addEventListener("input", syncUIToSettings);
-    });
+    ["mJpyPer10kUsdc","mJpyPer10kRmb","zJpyPer10kRmb","vJpyPer10kRmb","usdtCny","cashbackRate","taxDivisor","sellJpyPer10kRmb"]
+      .forEach(id => $(id).addEventListener("input", syncUIToSettings));
 
-    // -------------------------
-    // Add item
-    // -------------------------
     function addItem(){
       const it = {
         id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random(),
-        platform: $("platform").value,
-        name: $("name").value.trim(),
+        platform: $("platform").value.trim(),
+        name: ($("name").value || "").trim() || "(未命名)",
         jpy: n($("jpy").value, 0),
         qty: Math.max(1, n($("qty").value, 1)),
-        discount: Math.max(0, n($("discount").value, 0)),
+        discountFactor: n($("discountFactor").value, 1),
         taxFree: $("taxFree").value
       };
-      if(!it.name) it.name = "(未命名)";
       state.items.unshift(it);
       saveState();
       render();
     }
-
     $("btnAdd").addEventListener("click", addItem);
 
-    // -------------------------
-    // Export / Import JSON / Reset
-    // -------------------------
+    // Export / Import / Reset
     $("btnExport").addEventListener("click", ()=>{
       const blob = new Blob([JSON.stringify(state, null, 2)], {type:"application/json"});
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = url;
-      a.download = "ready-data.json";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+      a.href = url; a.download = "ready-v1.json";
+      document.body.appendChild(a); a.click(); a.remove();
       URL.revokeObjectURL(url);
     });
 
     $("btnImport").addEventListener("click", ()=>{
       const inp = document.createElement("input");
-      inp.type = "file";
-      inp.accept = "application/json";
+      inp.type = "file"; inp.accept = "application/json";
       inp.onchange = async () => {
         const f = inp.files && inp.files[0];
         if(!f) return;
-        const txt = await f.text();
         try{
-          const s = JSON.parse(txt);
-          // soft-merge
+          const s = JSON.parse(await f.text());
           state = {
             settings: { ...defaultState().settings, ...(s.settings||{}) },
             items: Array.isArray(s.items) ? s.items : []
@@ -527,19 +478,17 @@
     });
 
     $("btnReset").addEventListener("click", ()=>{
-      if(!confirm("确定重置？这会清空本机保存的数据。")) return;
+      if(!confirm("确定重置？会清空本机保存数据。")) return;
       state = defaultState();
       saveState();
       syncSettingsToUI();
       render();
     });
 
-    // -------------------------
-    // Excel Import (optional)
-    // -------------------------
+    // Excel Import
     $("btnImportExcel").addEventListener("click", ()=>{
       if(typeof XLSX === "undefined"){
-        alert("XLSX 库未加载，无法导入 Excel。你可以稍后刷新或改用导入 JSON。");
+        alert("XLSX 库未加载，无法导入。");
         return;
       }
       $("excelFile").value = "";
@@ -549,30 +498,26 @@
     $("excelFile").addEventListener("change", async (e)=>{
       const file = e.target.files && e.target.files[0];
       if(!file) return;
-
       try{
         const buf = await file.arrayBuffer();
         const wb = XLSX.read(buf, { type:"array" });
         const ws = wb.Sheets[wb.SheetNames[0]];
         const rows = XLSX.utils.sheet_to_json(ws, { defval:"" });
 
-        // header mapping (Chinese)
-        const map = (r, keys) => {
-          for(const k of keys){
-            if(k in r) return r[k];
-          }
+        const pick = (r, keys) => {
+          for(const k of keys){ if(k in r) return r[k]; }
           return "";
         };
 
         const imported = rows.map(r => ({
           id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random(),
-          platform: String(map(r, ["平台","platform","Platform"])).trim() || "Auto",
-          name: String(map(r, ["商品名","name","Name","商品"])).trim() || "(未命名)",
-          jpy: n(map(r, ["JPY","jpy","价格","单价"]), 0),
-          qty: Math.max(1, n(map(r, ["数量","qty","Qty"]), 1)),
-          discount: Math.max(0, n(map(r, ["折扣幅度","折扣","discount","Discount"]), 0)),
-          taxFree: String(map(r, ["免税","taxFree","TaxFree"])).toUpperCase() === "YES" ? "YES" : "NO"
-        }));
+          platform: String(pick(r, ["平台","platform","Platform"])).trim(),
+          name: String(pick(r, ["商品名","商品","name","Name"])).trim() || "(未命名)",
+          jpy: n(pick(r, ["JPY","jpy","单价","价格"]), 0),
+          qty: Math.max(1, n(pick(r, ["数量","qty","Qty"]), 1)),
+          discountFactor: n(pick(r, ["折扣幅度","折扣","discountFactor","DiscountFactor"]), 1),
+          taxFree: String(pick(r, ["是否免税","免税","taxFree","TaxFree"])).toUpperCase()==="YES" ? "YES" : "NO"
+        })).filter(x => x.jpy || x.name);
 
         state.items = imported.concat(state.items);
         saveState();
@@ -583,28 +528,31 @@
       }
     });
 
-    // -------------------------
-    // Render
-    // -------------------------
     function renderKpis(){
       const s = state.settings;
-      let sumBest = 0, sumReady = 0, sumVX = 0, sumZFB = 0, sumMaster = 0;
+      let sumReady=0,sumVX=0,sumZFB=0,sumMaster=0,sumMin=0,sumSell=0,sumProfit=0,sumOriginMaster=0;
 
       for(const it of state.items){
-        const c = calcRowCosts(it, s);
-        sumBest += c.min;
+        const c = calcRow(it, s);
         sumReady += c.ready;
         sumVX += c.vx;
         sumZFB += c.zfb;
         sumMaster += c.master;
+        sumMin += c.min;
+        sumSell += c.sell;
+        sumProfit += c.profit;
+        sumOriginMaster += c.originMaster;
       }
 
       const kpis = [
-        {k:"合计（按每行最优）", v: fmtCny(sumBest)},
-        {k:"合计（Ready）", v: fmtCny(sumReady)},
-        {k:"合计（VX）", v: fmtCny(sumVX)},
-        {k:"合计（ZFB）", v: fmtCny(sumZFB)},
-        {k:"合计（Master）", v: fmtCny(sumMaster)},
+        {k:"合计（最优价格）", v: fmt(sumMin)},
+        {k:"合计（Ready）", v: fmt(sumReady)},
+        {k:"合计（VX）", v: fmt(sumVX)},
+        {k:"合计（ZFB）", v: fmt(sumZFB)},
+        {k:"合计（Master）", v: fmt(sumMaster)},
+        {k:"合计（SELL）", v: fmt(sumSell)},
+        {k:"合计（PROFIT）", v: fmt(sumProfit)},
+        {k:"合计（原价/Master）", v: fmt(sumOriginMaster)}
       ];
 
       $("kpis").innerHTML = kpis.map(x=>`
@@ -617,40 +565,48 @@
 
     function renderTable(){
       const s = state.settings;
-      const tbody = $("tbody");
+      const tb = $("tbody");
 
-      tbody.innerHTML = state.items.map((it, idx)=>{
-        const c = calcRowCosts(it, s);
+      tb.innerHTML = state.items.map((it, idx)=>{
+        const c = calcRow(it, s);
 
-        const minClass = c.minLabel==="Ready" ? "min-ok" :
-                         c.minLabel==="VX" ? "min-warn" :
-                         c.minLabel==="ZFB" ? "min-ok" :
-                         "min-bad";
+        const minClass =
+          c.minLabel==="Ready" ? "min-ok" :
+          c.minLabel==="VX" ? "min-warn" :
+          c.minLabel==="ZFB" ? "min-ok" : "min-bad";
 
         return `
           <tr data-id="${esc(it.id)}">
             <td>${idx+1}</td>
-            <td contenteditable="true" data-k="platform"><span class="pill">${esc(it.platform)}</span></td>
+            <td contenteditable="true" data-k="platform"><span class="pill">${esc(it.platform||"")}</span></td>
             <td contenteditable="true" data-k="name">${esc(it.name)}</td>
             <td contenteditable="true" data-k="jpy">${esc(it.jpy)}</td>
             <td contenteditable="true" data-k="qty">${esc(it.qty)}</td>
-            <td contenteditable="true" data-k="discount">${esc(it.discount)}</td>
+            <td contenteditable="true" data-k="discountFactor">${esc(it.discountFactor)}</td>
             <td contenteditable="true" data-k="taxFree">${esc(it.taxFree)}</td>
 
-            <td>${fmtCny(c.ready)}</td>
-            <td>${fmtCny(c.vx)}</td>
-            <td>${fmtCny(c.zfb)}</td>
-            <td>${fmtCny(c.master)}</td>
+            <td>${fmt(c.jpyDiscount)}</td>
+            <td>${fmt(c.jpyTax)}</td>
 
-            <td class="${minClass}">${fmtCny(c.min)}</td>
+            <td>${fmt(c.ready)}</td>
+            <td>${fmt(c.vx)}</td>
+            <td>${fmt(c.zfb)}</td>
+            <td>${fmt(c.master)}</td>
+
+            <td class="${minClass}">${fmt(c.min)}</td>
             <td class="${minClass}">${esc(c.minLabel)}</td>
+
+            <td>${fmt(c.sell)}</td>
+            <td class="${c.profit>=0 ? "min-ok":"min-bad"}">${fmt(c.profit)}</td>
+            <td>${fmt(c.originMaster)}</td>
+
             <td><button class="btn ghost" data-act="del">删除</button></td>
           </tr>
         `;
       }).join("");
 
-      // delete
-      tbody.querySelectorAll('button[data-act="del"]').forEach(btn=>{
+      // 删除
+      tb.querySelectorAll('button[data-act="del"]').forEach(btn=>{
         btn.addEventListener("click", (e)=>{
           const tr = e.target.closest("tr");
           const id = tr?.getAttribute("data-id");
@@ -661,30 +617,25 @@
         });
       });
 
-      // inline edit (contenteditable)
-      tbody.querySelectorAll('[contenteditable="true"]').forEach(cell=>{
+      // 行内编辑
+      tb.querySelectorAll('[contenteditable="true"]').forEach(cell=>{
         cell.addEventListener("blur", (e)=>{
           const td = e.target;
           const tr = td.closest("tr");
           const id = tr.getAttribute("data-id");
           const k = td.getAttribute("data-k");
-          let val = td.innerText.trim();
+          const val = td.innerText.trim();
 
           const it = state.items.find(x=>x.id === id);
           if(!it) return;
 
-          if(k === "jpy" || k === "qty" || k === "discount"){
-            it[k] = n(val, 0);
+          if(k === "jpy" || k === "qty" || k === "discountFactor"){
+            it[k] = n(val, k==="discountFactor" ? 1 : 0);
             if(k === "qty") it[k] = Math.max(1, it[k]);
-            if(k === "discount") it[k] = Math.max(0, it[k]);
           }else if(k === "taxFree"){
-            it.taxFree = String(val).toUpperCase() === "YES" ? "YES" : "NO";
-          }else if(k === "platform"){
-            // allow plain text edit
-            const v = val.replace(/\s+/g,"");
-            it.platform = v || "Auto";
+            it.taxFree = String(val).toUpperCase()==="YES" ? "YES" : "NO";
           }else{
-            it[k] = val || "";
+            it[k] = val;
           }
 
           saveState();
