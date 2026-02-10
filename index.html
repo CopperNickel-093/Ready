@@ -1,219 +1,807 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>Ready 助手 · by Copper Nickel</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1020" />
+  <title>Ready 助手（V1 等价）</title>
+  <style>
+    :root{
+      --bg:#0b1020; --bg2:#070a14;
+      --card: rgba(18,26,51,.92);
+      --text:#e8ecff; --muted:#a9b2d6;
+      --line: rgba(255,255,255,.10);
+      --ok:#6ef2b6; --warn:#ffd27a; --bad:#ff8a8a;
+      --btn1:#2b3a75; --btn2:#1e2a55;
+      --shadow: 0 10px 30px rgba(0,0,0,.28);
+      --radius: 16px;
 
-<style>
-:root{
-  --bg:#0b1020; --bg2:#070a14;
-  --card:rgba(18,26,51,.92);
-  --text:#e8ecff; --muted:#a9b2d6;
-  --line:rgba(255,255,255,.10);
-  --ok:#1fd074; --bad:#ff3b3b;
-  --radius:16px;
-}
-*{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:system-ui,-apple-system,"Segoe UI",Arial;
-  background:linear-gradient(180deg,var(--bg),var(--bg2));
-  color:var(--text);
-}
-.container{max-width:1080px;margin:0 auto;padding:14px}
+      --red:#ff3b3b;
+      --green:#1fd074;
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0; font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+      background: linear-gradient(180deg,var(--bg),var(--bg2));
+      color:var(--text);
+    }
+    .container{ max-width: 1080px; margin:0 auto; padding: 14px; }
+    .topbar{
+      position: sticky; top:0; z-index:50;
+      background: rgba(11,16,32,.78);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--line);
+    }
+    .topbar-inner{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px; padding: 12px 14px;
+      max-width: 1080px; margin: 0 auto;
+    }
+    .brand{ display:flex; flex-direction:column; gap:2px; }
+    .brand .title{ font-weight: 900; letter-spacing:.2px; font-size: 16px; }
+    .brand .subtitle{ color: var(--muted); font-size: 12px; }
+    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .btn{
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg,var(--btn1),var(--btn2));
+      color: var(--text);
+      padding: 9px 11px;
+      border-radius: 12px;
+      cursor:pointer;
+      font-weight: 700;
+      font-size: 13px;
+      box-shadow: 0 8px 20px rgba(0,0,0,.20);
+      user-select:none;
+    }
+    .btn.ghost{ background: rgba(255,255,255,.05); box-shadow:none; }
+    .btn.danger{ background: rgba(255,80,80,.14); }
+    .btn:active{ transform: translateY(1px); }
+    .card{
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px;
+      box-shadow: var(--shadow);
+      margin-top: 14px;
+    }
+    .card h3{ margin:0 0 8px 0; font-size: 14px; letter-spacing:.2px; }
+    .hint{ color: var(--muted); font-size: 12px; line-height: 1.55; }
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .field{ grid-column: span 6; display:flex; flex-direction:column; gap:6px; }
+    .field.small{ grid-column: span 4; }
+    .field.tiny{ grid-column: span 3; }
+    .label{ font-size: 12px; color: var(--muted); }
+    .input{
+      width:100%;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      padding: 10px 10px;
+      border-radius: 12px;
+      outline: none;
+      font-size: 14px;
+    }
+    .input::placeholder{ color: rgba(233,236,255,.35); }
+    .hr{ height:1px; background: var(--line); margin: 12px 0; }
+    .kpi-grid{
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .kpi{
+      grid-column: span 4;
+      background: rgba(255,255,255,.05);
+      border:1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+    }
+    .kpi .k{ color: var(--muted); font-size: 12px; }
+    .kpi .v{ font-weight: 900; font-size: 18px; margin-top: 4px; }
+    .badge{
+      display:inline-flex; align-items:center; gap:6px;
+      font-size: 12px; padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.06);
+      color: var(--muted);
+      margin-left: 8px;
+    }
+    .table-wrap{
+      overflow:auto;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.03);
+    }
+    table{ border-collapse: collapse; width:100%; font-size: 13px; min-width: 1150px; }
+    th,td{
+      border: 1px solid rgba(255,255,255,.08);
+      padding: 8px 10px;
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+    th{
+      position: sticky; top:0;
+      background: rgba(18,26,51,.98);
+      z-index: 2;
+      text-align:left;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    td[contenteditable="true"]{ background: rgba(255,255,255,.04); cursor: text; }
+    .pill{
+      display:inline-flex; align-items:center; gap:6px;
+      padding: 4px 10px; border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.06);
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .min-ok{ color: var(--ok); font-weight: 900; }
+    .min-warn{ color: var(--warn); font-weight: 900; }
+    .min-bad{ color: var(--bad); font-weight: 900; }
 
-/* ===== Topbar ===== */
-.topbar{
-  position:sticky;top:0;z-index:10;
-  background:rgba(11,16,32,.8);
-  backdrop-filter:blur(10px);
-  border-bottom:1px solid var(--line);
-}
-.topbar-inner{
-  max-width:1080px;margin:0 auto;
-  padding:12px 14px;
-  display:flex;align-items:center;
-}
-.author{display:flex;align-items:center;gap:10px}
-.avatar{
-  width:34px;height:34px;border-radius:50%;
-  border:1px solid rgba(255,255,255,.2);
-  object-fit:cover;
-}
-.brand .title{font-weight:900;font-size:16px}
-.brand .subtitle{font-size:12px;color:var(--muted)}
+    /* Segmented toggle */
+    .toggle{
+      display:flex;
+      border:1px solid var(--line);
+      border-radius:12px;
+      overflow:hidden;
+      background: rgba(255,255,255,.04);
+    }
+    .toggle button{
+      flex:1;
+      padding:10px 10px;
+      font-weight:900;
+      font-size:13px;
+      color: rgba(255,255,255,.80);
+      background: transparent;
+      border:0;
+      cursor:pointer;
+    }
+    .toggle.small button{
+      padding:6px 10px;
+      font-size:12px;
+    }
+    /* active colors */
+    .toggle button[data-v="NO"].active{
+      background: var(--red);
+      color: #fff;
+    }
+    .toggle button[data-v="YES"].active{
+      background: var(--green);
+      color: #fff;
+    }
+    /* inactive look */
+    .toggle button:not(.active){
+      color: rgba(233,236,255,.55);
+      background: rgba(255,255,255,.03);
+    }
 
-/* ===== Card ===== */
-.card{
-  background:var(--card);
-  border:1px solid var(--line);
-  border-radius:var(--radius);
-  padding:14px;
-  margin-top:14px;
-}
-.card h3{margin:0 0 8px;font-size:14px}
-
-/* ===== Grid ===== */
-.grid{
-  display:grid;
-  grid-template-columns:repeat(12,1fr);
-  gap:10px;
-}
-.field{grid-column:span 4;display:flex;flex-direction:column;gap:6px}
-.label{font-size:12px;color:var(--muted)}
-.input{
-  width:100%;
-  padding:9px 10px;
-  border-radius:12px;
-  border:1px solid var(--line);
-  background:rgba(255,255,255,.06);
-  color:var(--text);
-}
-
-/* ===== Toggle ===== */
-.toggle{display:flex;border:1px solid var(--line);border-radius:12px;overflow:hidden}
-.toggle button{
-  flex:1;border:0;padding:6px 0;font-weight:900;color:#fff;cursor:pointer;
-}
-.toggle .no.active{background:var(--bad)}
-.toggle .yes.active{background:var(--ok)}
-.toggle button:not(.active){opacity:.35;background:#444}
-
-/* ===== Table ===== */
-.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:14px}
-table{border-collapse:collapse;width:100%;min-width:1100px;font-size:13px}
-th,td{border:1px solid rgba(255,255,255,.08);padding:8px}
-th{background:#121a33;color:var(--muted);position:sticky;top:0}
-td[contenteditable]{background:rgba(255,255,255,.05)}
-.min-ok{color:var(--ok);font-weight:900}
-.min-bad{color:var(--bad);font-weight:900}
-
-@media (max-width:720px){
-  .field{grid-column:span 12}
-}
-</style>
+    @media (max-width: 720px){
+      .field{ grid-column: span 12; }
+      .field.small, .field.tiny{ grid-column: span 12; }
+      .kpi{ grid-column: span 12; }
+      table{ min-width: 1080px; }
+    }
+  </style>
 </head>
 
 <body>
-
-<!-- ===== Top ===== -->
-<div class="topbar">
-  <div class="topbar-inner">
-    <div class="author">
-      <img src="./avatar.jpg" class="avatar" alt="Copper Nickel">
+  <div class="topbar">
+    <div class="topbar-inner">
       <div class="brand">
-        <div class="title">Ready 助手</div>
-        <div class="subtitle">by Copper Nickel</div>
+        <div class="title">Ready 助手 <span class="badge">V1 等价</span></div>
+        <div class="subtitle">数据仅保存在本机浏览器（localStorage），不上传服务器</div>
+      </div>
+      <div class="row">
+        <button class="btn ghost" id="btnExport">导出JSON</button>
+        <button class="btn ghost" id="btnImport">导入JSON</button>
+        <button class="btn danger" id="btnReset">重置</button>
       </div>
     </div>
   </div>
-</div>
 
-<div class="container">
+  <div class="container">
 
-<!-- ===== Settings ===== -->
-<div class="card">
-<h3>汇率 / 参数（V1）</h3>
-<div class="grid">
-  <div class="field"><div class="label">M JPY/U</div><input class="input" id="mju" value="63.9"></div>
-  <div class="field"><div class="label">M JPY/R</div><input class="input" id="mjr" value="443.49"></div>
-  <div class="field"><div class="label">Z JPY/R</div><input class="input" id="zjr" value="444.65"></div>
-  <div class="field"><div class="label">V JPY/R</div><input class="input" id="vjr" value="443.86"></div>
+    <div class="card">
+      <h3>汇率 / 参数（对齐 Excel V1）</h3>
+      <div class="grid">
+        <div class="field small">
+          <div class="label">M JPY/U（每 10000 JPY = ? USDC）</div>
+          <input class="input" id="mJpyPer10kUsdc" type="number" step="0.0001" />
+        </div>
+        <div class="field small">
+          <div class="label">M JPY/R（每 10000 JPY = ? RMB）</div>
+          <input class="input" id="mJpyPer10kRmb" type="number" step="0.0001" />
+        </div>
+        <div class="field small">
+          <div class="label">Z JPY/R（每 10000 JPY = ? RMB）</div>
+          <input class="input" id="zJpyPer10kRmb" type="number" step="0.0001" />
+        </div>
+        <div class="field small">
+          <div class="label">V JPY/R（每 10000 JPY = ? RMB）</div>
+          <input class="input" id="vJpyPer10kRmb" type="number" step="0.0001" />
+        </div>
 
-  <div class="field"><div class="label">USDT/CNY（买取）</div><input class="input" id="usdt" value="6.97"></div>
-  <div class="field"><div class="label">提U磨损</div><input class="input" id="loss1" value="0.9986"></div>
-  <div class="field"><div class="label">T/C磨损</div><input class="input" id="loss2" value="0.9945"></div>
-  <div class="field"><div class="label">USDC/CNY（自动）</div><input class="input" id="usdc" disabled></div>
+        <div class="field small">
+          <div class="label">USDT/CNY（买取）</div>
+          <input class="input" id="usdtCny" type="number" step="0.0001" />
+        </div>
 
-  <div class="field"><div class="label">Cashback %</div><input class="input" id="cash" value="3"></div>
-  <div class="field"><div class="label">税率 %</div><input class="input" id="tax" value="10"></div>
-  <div class="field"><div class="label">SELL JPY/R</div><input class="input" id="sell" value="500"></div>
-</div>
-</div>
+        <!-- 同一列：提U磨损 + T/C磨损 + USDC/CNY -->
+        <div class="field small">
+          <div class="label">提U磨损</div>
+          <input class="input" id="usdtDiv1" type="number" step="0.0001" />
+          <div class="label" style="margin-top:6px;">T/C磨损</div>
+          <input class="input" id="usdtDiv2" type="number" step="0.0001" />
+          <div class="label" style="margin-top:6px;">USDC/CNY（自动）</div>
+          <input class="input" id="usdcCny" type="number" step="0.0001" disabled />
+        </div>
 
-<!-- ===== Table ===== -->
-<div class="card">
-<h3>商品列表</h3>
-<div class="table-wrap">
-<table>
-<thead>
-<tr>
-<th>#</th><th>平台</th><th>分类</th><th>商品名</th>
-<th>JPY</th><th>数量</th><th>优惠%</th><th>免税</th>
-<th>最优价</th><th>最优平台</th><th>PROFIT</th>
-</tr>
-</thead>
-<tbody id="tb"></tbody>
-</table>
-</div>
-</div>
+        <div class="field small">
+          <div class="label">Cashback（%）</div>
+          <input class="input" id="cashbackPct" type="number" step="0.01" />
+        </div>
+        <div class="field small">
+          <div class="label">税率（%）</div>
+          <input class="input" id="taxRatePct" type="number" step="0.01" />
+        </div>
+        <div class="field small">
+          <div class="label">SELL JPY/R（每 10000 JPY = ? RMB）</div>
+          <input class="input" id="sellJpyPer10kRmb" type="number" step="0.0001" />
+        </div>
+      </div>
+      <div class="hint" style="margin-top:10px;">
+        优惠幅度按“减免比例”输入：填 15 表示优惠 15%（等价于支付 85%）。免税 YES 时按 <code>/ (1 + 税率%)</code> 去税。Cashback 输入 3 表示 3%。
+      </div>
+    </div>
 
-</div>
+    <div class="card">
+      <h3>添加商品</h3>
+      <div class="grid">
+        <div class="field small">
+          <div class="label">平台（自由输入）</div>
+          <input class="input" id="platform" placeholder="例如 Ready / VX / ZFB / Master…" />
+        </div>
 
-<script>
-const tb = document.getElementById("tb");
+        <div class="field tiny">
+          <div class="label">商品分类</div>
+          <input class="input" id="category" placeholder="例如 耳机 / 线材 / 配件…" />
+        </div>
 
-let items = [
-  { p:"Ready", c:"耳机", n:"示例商品", j:100000, q:1, o:15, t:"NO" }
-];
+        <div class="field">
+          <div class="label">商品名</div>
+          <input class="input" id="name" placeholder="例如 耳机 / 配件…" />
+        </div>
 
-function calc(){
-  const usdtV = Number(usdt.value) || 0;
-  const loss1V = Number(loss1.value) || 1;
-  const loss2V = Number(loss2.value) || 1;
+        <div class="field small">
+          <div class="label">JPY（单价）</div>
+          <input class="input" id="jpy" type="number" step="1" placeholder="例如 98000" />
+        </div>
+        <div class="field tiny">
+          <div class="label">数量</div>
+          <input class="input" id="qty" type="number" step="1" placeholder="1" />
+        </div>
+        <div class="field tiny">
+          <div class="label">优惠幅度（%）</div>
+          <input class="input" id="promoOffPct" type="number" step="0.01" placeholder="例如 15" />
+        </div>
 
-  const usdcRate = usdtV / loss1V / loss2V;
-  document.getElementById("usdc").value = usdcRate.toFixed(6);
-
-  const mjuV = Number(mju.value)||0;
-  const mjrV = Number(mjr.value)||0;
-  const zjrV = Number(zjr.value)||0;
-  const vjrV = Number(vjr.value)||0;
-  const cashV = (Number(cash.value)||0)/100;
-  const taxV  = (Number(tax.value)||0)/100;
-  const sellV = Number(sell.value)||0;
-
-  tb.innerHTML = "";
-
-  items.forEach((it,i)=>{
-    const pay  = (1 - (Number(it.o)||0)/100) * (Number(it.j)||0) * (Number(it.q)||1);
-    const base = it.t==="YES" ? pay/(1+taxV) : pay;
-
-    const ready  = base*(mjuV/10000)*usdcRate*(1-cashV);
-    const vx     = base*(vjrV/10000);
-    const zfb    = base*(zjrV/10000);
-    const master = base*(mjrV/10000);
-
-    const min = Math.min(ready,vx,zfb,master);
-    const label = min===ready?"Ready":min===vx?"VX":min===zfb?"ZFB":"Master";
-    const profit = (Number(it.j)||0)*(sellV/10000)-min;
-
-    tb.insertAdjacentHTML("beforeend",`
-      <tr>
-        <td>${i+1}</td>
-        <td contenteditable>${it.p}</td>
-        <td contenteditable>${it.c}</td>
-        <td contenteditable>${it.n}</td>
-        <td contenteditable>${it.j}</td>
-        <td contenteditable>${it.q}</td>
-        <td contenteditable>${it.o}</td>
-        <td>
-          <div class="toggle">
-            <button class="no ${it.t==="NO"?"active":""}" onclick="it.t='NO';calc()">NO</button>
-            <button class="yes ${it.t==="YES"?"active":""}" onclick="it.t='YES';calc()">YES</button>
+        <div class="field tiny">
+          <div class="label">是否免税</div>
+          <div class="toggle" id="taxFreeToggle">
+            <button type="button" data-v="NO" class="active">NO</button>
+            <button type="button" data-v="YES">YES</button>
           </div>
-        </td>
-        <td class="min-ok">${min.toFixed(2)}</td>
-        <td>${label}</td>
-        <td class="${profit>=0?"min-ok":"min-bad"}">${profit.toFixed(2)}</td>
-      </tr>
-    `);
-  });
-}
+        </div>
+      </div>
 
-calc();
-</script>
+      <div class="row" style="margin-top:12px;">
+        <button class="btn" id="btnAdd">添加</button>
+        <button class="btn ghost" id="btnImportExcel">从 Excel 导入</button>
+        <input id="excelFile" type="file" accept=".xlsx,.xls" style="display:none;" />
+      </div>
+      <div class="hint" style="margin-top:10px;">
+        Excel 导入：读取第 1 个 Sheet。若折扣列是“0.85 / 85（表示支付85%）”，会自动转换成“优惠15%”。若你 Excel 里已经是“优惠幅度”，则直接按 15 读取。
+      </div>
+    </div>
 
+    <div class="card">
+      <h3>清单 <span class="badge">点击单元格可编辑（自动保存）</span></h3>
+
+      <div class="kpi-grid" id="kpis"></div>
+
+      <div class="hr"></div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+          <tr>
+            <th>#</th>
+            <th>平台</th>
+            <th>商品分类</th>
+            <th>商品名</th>
+            <th>JPY</th>
+            <th>数量</th>
+            <th>优惠%</th>
+            <th>免税</th>
+            <th>最优价格</th>
+            <th>最优解</th>
+            <th>RMB/SELL</th>
+            <th>PROFIT</th>
+            <th>原价/Master</th>
+            <th>操作</th>
+          </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="hint" style="margin-top:12px;">
+        最优解规则与 Excel 一致：在 Ready/VX/ZFB/Master 中取最小值，若并列则按 Ready→VX→ZFB→Master 的优先级输出。
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <script>
+    const KEY = "ready_v1_state_v3_category_promoOff_toggle_colors";
+
+    const defaultState = () => ({
+      settings: {
+        mJpyPer10kUsdc: 63.9,
+        mJpyPer10kRmb: 443.49,
+        zJpyPer10kRmb: 444.65,
+        vJpyPer10kRmb: 443.86,
+        usdtCny: 6.97,
+        usdtDiv1: 0.9986, // 提U磨损
+        usdtDiv2: 0.9945, // T/C磨损
+        cashbackPct: 3,
+        taxRatePct: 10,
+        sellJpyPer10kRmb: 500
+      },
+      items: []
+    });
+
+    function loadState(){
+      try{
+        const raw = localStorage.getItem(KEY);
+        if(!raw) return defaultState();
+        const s = JSON.parse(raw);
+        return {
+          settings: { ...defaultState().settings, ...(s.settings||{}) },
+          items: Array.isArray(s.items) ? s.items : []
+        };
+      }catch{
+        return defaultState();
+      }
+    }
+
+    let state = loadState();
+    function saveState(){ localStorage.setItem(KEY, JSON.stringify(state)); }
+
+    const $ = (id) => document.getElementById(id);
+    const n = (v, def=0) => { const x = Number(v); return Number.isFinite(x) ? x : def; };
+    const esc = (s)=> String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    const fmt = (x)=> Number.isFinite(x) ? x.toFixed(2) : "";
+
+    function clamp(x, lo, hi){ return Math.min(hi, Math.max(lo, x)); }
+
+    // 通用：输入可能是 0.95 或 95 -> 转为“百分比值”
+    function toPct(v, defaultPct){
+      const x = n(v, NaN);
+      if(!Number.isFinite(x)) return defaultPct;
+      if(x <= 0) return defaultPct;
+      if(x <= 1.5) return x * 100;
+      return x;
+    }
+
+    // 将“支付比例(%)”或“支付系数”转换成“优惠%”
+    // 例：0.85 -> 优惠15；85 -> 优惠15
+    function payToOffPct(v, defaultOff=0){
+      const payPct = toPct(v, 100);
+      const off = 100 - payPct;
+      return clamp(off, 0, 100);
+    }
+
+    // 将“优惠%”规范化
+    function toOffPct(v, defaultOff=0){
+      const x = n(v, NaN);
+      if(!Number.isFinite(x)) return defaultOff;
+      if(x < 0) return 0;
+      // 若用户误填 0.15 也兼容：认为是 15%
+      if(x <= 1.5) return clamp(x * 100, 0, 100);
+      return clamp(x, 0, 100);
+    }
+
+    function calcUsdcCny(s){
+      const div1 = n(s.usdtDiv1, 0.9986);
+      const div2 = n(s.usdtDiv2, 0.9945);
+      return n(s.usdtCny,0) / div1 / div2;
+    }
+
+    function setTaxFreeToggle(v){
+      const val = String(v||'NO').toUpperCase()==='YES' ? 'YES' : 'NO';
+      document.querySelectorAll('#taxFreeToggle button').forEach(b=>{
+        b.classList.toggle('active', b.getAttribute('data-v') === val);
+      });
+    }
+
+    function getTaxFreeFromToggle(){
+      const el = document.querySelector('#taxFreeToggle button.active');
+      return el ? el.getAttribute('data-v') : 'NO';
+    }
+
+    document.getElementById('taxFreeToggle').addEventListener('click', (e)=>{
+      const btn = e.target.closest('button[data-v]');
+      if(!btn) return;
+      setTaxFreeToggle(btn.getAttribute('data-v'));
+    });
+
+    function calcRow(it, s){
+      const jpy = n(it.jpy, 0);
+      const qty = Math.max(1, n(it.qty, 1));
+
+      const offPct = toOffPct(it.promoOffPct, 0);
+      const payFactor = 1 - (offPct / 100);
+
+      const taxFree = String(it.taxFree||"NO").toUpperCase() === "YES";
+      const taxRatePct = toPct(s.taxRatePct, 10);
+      const taxDivisor = 1 + (taxRatePct / 100);
+
+      const jpyDiscount = jpy * payFactor * qty;
+      const jpyTax = taxFree ? (jpyDiscount / taxDivisor) : jpyDiscount;
+
+      // Ready
+      const usdcCny = calcUsdcCny(s);
+      const usdcM = jpyTax * (n(s.mJpyPer10kUsdc,0) / 10000);
+      const rmbU = usdcM * usdcCny;
+      const cashbackPct = toPct(s.cashbackPct, 3);
+      const cashback = rmbU * (cashbackPct / 100);
+      const ready = rmbU - cashback;
+
+      // VX/ZFB/Master
+      const vx = jpyTax * (n(s.vJpyPer10kRmb,0) / 10000);
+      const zfb = jpyTax * (n(s.zJpyPer10kRmb,0) / 10000);
+      const master = jpyTax * (n(s.mJpyPer10kRmb,0) / 10000);
+
+      const min = Math.min(ready, vx, zfb, master);
+      let minLabel = "Master";
+      if (ready === min) minLabel = "Ready";
+      else if (vx === min) minLabel = "VX";
+      else if (zfb === min) minLabel = "ZFB";
+      else minLabel = "Master";
+
+      const sell = jpy * (n(s.sellJpyPer10kRmb,0) / 10000) * qty;
+      const profit = sell - min;
+      const originMaster = jpy * (n(s.mJpyPer10kRmb,0) / 10000) * qty;
+
+      return { min, minLabel, sell, profit, originMaster };
+    }
+
+    function syncSettingsToUI(){
+      const s = state.settings;
+      $("mJpyPer10kUsdc").value = s.mJpyPer10kUsdc;
+      $("mJpyPer10kRmb").value  = s.mJpyPer10kRmb;
+      $("zJpyPer10kRmb").value  = s.zJpyPer10kRmb;
+      $("vJpyPer10kRmb").value  = s.vJpyPer10kRmb;
+      $("usdtCny").value        = s.usdtCny;
+      $("usdtDiv1").value       = s.usdtDiv1;
+      $("usdtDiv2").value       = s.usdtDiv2;
+      $("cashbackPct").value    = s.cashbackPct;
+      $("taxRatePct").value     = s.taxRatePct;
+      $("sellJpyPer10kRmb").value = s.sellJpyPer10kRmb;
+      $("usdcCny").value = calcUsdcCny(s).toFixed(6);
+    }
+
+    function syncUIToSettings(){
+      const s = state.settings;
+      s.mJpyPer10kUsdc = n($("mJpyPer10kUsdc").value, 0);
+      s.mJpyPer10kRmb  = n($("mJpyPer10kRmb").value, 0);
+      s.zJpyPer10kRmb  = n($("zJpyPer10kRmb").value, 0);
+      s.vJpyPer10kRmb  = n($("vJpyPer10kRmb").value, 0);
+      s.usdtCny        = n($("usdtCny").value, 0);
+      s.usdtDiv1       = n($("usdtDiv1").value, 0.9986);
+      s.usdtDiv2       = n($("usdtDiv2").value, 0.9945);
+      s.cashbackPct    = n($("cashbackPct").value, 0);
+      s.taxRatePct     = n($("taxRatePct").value, 0);
+      s.sellJpyPer10kRmb = n($("sellJpyPer10kRmb").value, 0);
+
+      $("usdcCny").value = calcUsdcCny(s).toFixed(6);
+      saveState();
+      render();
+    }
+
+    ["mJpyPer10kUsdc","mJpyPer10kRmb","zJpyPer10kRmb","vJpyPer10kRmb","usdtCny","usdtDiv1","usdtDiv2","cashbackPct","taxRatePct","sellJpyPer10kRmb"]
+      .forEach(id => $(id).addEventListener("input", syncUIToSettings));
+
+    // 迁移：旧版可能存 discountPct（支付百分比），转换为 promoOffPct（优惠百分比）
+    function migrateItems(){
+      for(const it of state.items){
+        // 若已有 promoOffPct 就不动
+        if(it.promoOffPct == null){
+          if(it.discountPct != null){
+            it.promoOffPct = payToOffPct(it.discountPct, 0);
+            delete it.discountPct;
+          }else if(it.discountFactor != null){
+            it.promoOffPct = payToOffPct(it.discountFactor, 0);
+            delete it.discountFactor;
+          }else{
+            it.promoOffPct = 0;
+          }
+        }else{
+          it.promoOffPct = toOffPct(it.promoOffPct, 0);
+        }
+        if(it.category == null) it.category = "";
+      }
+      saveState();
+    }
+
+    function addItem(){
+      const it = {
+        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random(),
+        platform: ($("platform").value || "").trim(),
+        category: ($("category").value || "").trim(),
+        name: ($("name").value || "").trim() || "(未命名)",
+        jpy: n($("jpy").value, 0),
+        qty: Math.max(1, n($("qty").value, 1)),
+        promoOffPct: toOffPct($("promoOffPct").value, 0),
+        taxFree: getTaxFreeFromToggle()
+      };
+      state.items.unshift(it);
+      saveState();
+      render();
+    }
+    $("btnAdd").addEventListener("click", addItem);
+
+    $("btnExport").addEventListener("click", ()=>{
+      const blob = new Blob([JSON.stringify(state, null, 2)], {type:"application/json"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = "ready-v1.json";
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    $("btnImport").addEventListener("click", ()=>{
+      const inp = document.createElement("input");
+      inp.type = "file"; inp.accept = "application/json";
+      inp.onchange = async () => {
+        const f = inp.files && inp.files[0];
+        if(!f) return;
+        try{
+          const s = JSON.parse(await f.text());
+          state = {
+            settings: { ...defaultState().settings, ...(s.settings||{}) },
+            items: Array.isArray(s.items) ? s.items : []
+          };
+          // 兼容旧版 settings
+          if("cashbackRate" in (s.settings||{})) state.settings.cashbackPct = toPct(s.settings.cashbackRate, 3);
+          if("taxDivisor" in (s.settings||{})){
+            const div = n(s.settings.taxDivisor, 1.1);
+            state.settings.taxRatePct = Math.max(0, (div - 1) * 100);
+          }
+          saveState();
+          migrateItems();
+          syncSettingsToUI();
+          render();
+        }catch(e){
+          alert("JSON 解析失败：" + (e?.message || e));
+        }
+      };
+      inp.click();
+    });
+
+    $("btnReset").addEventListener("click", ()=>{
+      if(!confirm("确定重置？会清空本机保存数据。")) return;
+      state = defaultState();
+      saveState();
+      syncSettingsToUI();
+      setTaxFreeToggle("NO");
+      render();
+    });
+
+    $("btnImportExcel").addEventListener("click", ()=>{
+      if(typeof XLSX === "undefined"){
+        alert("XLSX 库未加载，无法导入。");
+        return;
+      }
+      $("excelFile").value = "";
+      $("excelFile").click();
+    });
+
+    $("excelFile").addEventListener("change", async (e)=>{
+      const file = e.target.files && e.target.files[0];
+      if(!file) return;
+      try{
+        const buf = await file.arrayBuffer();
+        const wb = XLSX.read(buf, { type:"array" });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(ws, { defval:"" });
+
+        const pick = (r, keys) => {
+          for(const k of keys){ if(k in r) return r[k]; }
+          return "";
+        };
+
+        const imported = rows.map(r => {
+          const rawDisc = pick(r, ["优惠幅度","优惠%","promoOffPct","PromoOffPct", "折扣幅度","折扣","discountPct","DiscountPct","discountFactor","DiscountFactor"]);
+          // 规则：如果列名是“优惠幅度”，按优惠%读；如果是旧的“折扣幅度”，把支付比例转成优惠%
+          let offPct = 0;
+          const hasPromoHeader =
+            ("优惠幅度" in r) || ("优惠%" in r) || ("promoOffPct" in r) || ("PromoOffPct" in r);
+          if(hasPromoHeader){
+            offPct = toOffPct(rawDisc, 0);
+          }else{
+            // 旧表：折扣幅度是支付比例
+            offPct = payToOffPct(rawDisc, 0);
+          }
+
+          return ({
+            id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random(),
+            platform: String(pick(r, ["平台","platform","Platform"])).trim(),
+            category: String(pick(r, ["商品分类","分类","category","Category"])).trim(),
+            name: String(pick(r, ["商品名","商品","name","Name"])).trim() || "(未命名)",
+            jpy: n(pick(r, ["JPY","jpy","单价","价格"]), 0),
+            qty: Math.max(1, n(pick(r, ["数量","qty","Qty"]), 1)),
+            promoOffPct: offPct,
+            taxFree: String(pick(r, ["是否免税","免税","taxFree","TaxFree"])).toUpperCase()==="YES" ? "YES" : "NO"
+          });
+        }).filter(x => x.jpy || x.name);
+
+        state.items = imported.concat(state.items);
+        saveState();
+        render();
+        alert(`已导入 ${imported.length} 行（第 1 个 Sheet）。`);
+      }catch(err){
+        alert("导入失败：" + (err?.message || err));
+      }
+    });
+
+    function renderKpis(){
+      const s = state.settings;
+      let sumMin=0,sumSell=0,sumProfit=0,sumOriginMaster=0;
+
+      for(const it of state.items){
+        const c = calcRow(it, s);
+        sumMin += c.min;
+        sumSell += c.sell;
+        sumProfit += c.profit;
+        sumOriginMaster += c.originMaster;
+      }
+
+      const kpis = [
+        {k:"合计（最优价格）", v: fmt(sumMin)},
+        {k:"合计（SELL）", v: fmt(sumSell)},
+        {k:"合计（PROFIT）", v: fmt(sumProfit)},
+        {k:"合计（原价/Master）", v: fmt(sumOriginMaster)}
+      ];
+
+      $("kpis").innerHTML = kpis.map(x=>`
+        <div class="kpi">
+          <div class="k">${esc(x.k)}</div>
+          <div class="v">${esc(x.v)}</div>
+        </div>
+      `).join("");
+    }
+
+    function renderTable(){
+      const s = state.settings;
+      const tb = $("tbody");
+
+      tb.innerHTML = state.items.map((it, idx)=>{
+        const c = calcRow(it, s);
+
+        const minClass =
+          c.minLabel==="Ready" ? "min-ok" :
+          c.minLabel==="VX" ? "min-warn" :
+          c.minLabel==="ZFB" ? "min-ok" : "min-bad";
+
+        return `
+          <tr data-id="${esc(it.id)}">
+            <td>${idx+1}</td>
+            <td contenteditable="true" data-k="platform"><span class="pill">${esc(it.platform||"")}</span></td>
+            <td contenteditable="true" data-k="category">${esc(it.category||"")}</td>
+            <td contenteditable="true" data-k="name">${esc(it.name)}</td>
+            <td contenteditable="true" data-k="jpy">${esc(it.jpy)}</td>
+            <td contenteditable="true" data-k="qty">${esc(it.qty)}</td>
+            <td contenteditable="true" data-k="promoOffPct">${esc(toOffPct(it.promoOffPct,0))}</td>
+
+            <td>
+              <div class="toggle small" data-k="taxFreeToggleRow">
+                <button type="button" data-v="NO" class="${String(it.taxFree).toUpperCase()==='YES' ? '' : 'active'}">NO</button>
+                <button type="button" data-v="YES" class="${String(it.taxFree).toUpperCase()==='YES' ? 'active' : ''}">YES</button>
+              </div>
+            </td>
+
+            <td class="${minClass}">${fmt(c.min)}</td>
+            <td class="${minClass}">${esc(c.minLabel)}</td>
+
+            <td>${fmt(c.sell)}</td>
+            <td class="${c.profit>=0 ? "min-ok":"min-bad"}">${fmt(c.profit)}</td>
+            <td>${fmt(c.originMaster)}</td>
+
+            <td><button class="btn ghost" data-act="del">删除</button></td>
+          </tr>
+        `;
+      }).join("");
+
+      // 删除
+      tb.querySelectorAll('button[data-act="del"]').forEach(btn=>{
+        btn.addEventListener("click", (e)=>{
+          const tr = e.target.closest("tr");
+          const id = tr?.getAttribute("data-id");
+          if(!id) return;
+          state.items = state.items.filter(x=>x.id !== id);
+          saveState();
+          render();
+        });
+      });
+
+      // 行内免税 toggle
+      tb.querySelectorAll('[data-k="taxFreeToggleRow"]').forEach(box=>{
+        box.addEventListener('click', (e)=>{
+          const btn = e.target.closest('button[data-v]');
+          if(!btn) return;
+          const tr = e.target.closest('tr');
+          const id = tr?.getAttribute('data-id');
+          if(!id) return;
+
+          const it = state.items.find(x=>x.id === id);
+          if(!it) return;
+
+          it.taxFree = btn.getAttribute('data-v'); // 'YES' or 'NO'
+          saveState();
+          render();
+        });
+      });
+
+      // 行内编辑（不包含免税）
+      tb.querySelectorAll('[contenteditable="true"]').forEach(cell=>{
+        cell.addEventListener("blur", (e)=>{
+          const td = e.target;
+          const tr = td.closest("tr");
+          const id = tr.getAttribute("data-id");
+          const k = td.getAttribute("data-k");
+          const val = td.innerText.trim();
+
+          const it = state.items.find(x=>x.id === id);
+          if(!it) return;
+
+          if(k === "jpy" || k === "qty"){
+            it[k] = n(val, 0);
+            if(k === "qty") it[k] = Math.max(1, it[k]);
+          }else if(k === "promoOffPct"){
+            it.promoOffPct = toOffPct(val, 0);
+          }else{
+            it[k] = val;
+          }
+
+          saveState();
+          render();
+        });
+      });
+    }
+
+    function render(){
+      $("usdcCny").value = calcUsdcCny(state.settings).toFixed(6);
+      renderKpis();
+      renderTable();
+    }
+
+    // init
+    migrateItems();
+    syncSettingsToUI();
+    setTaxFreeToggle("NO");
+    render();
+  </script>
 </body>
 </html>
