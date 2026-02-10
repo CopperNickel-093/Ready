@@ -1,50 +1,706 @@
 <!doctype html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
-  <meta charset="utf-8">
-  <title>Excel Web Viewer</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1020" />
+  <title>Ready 助手（PWA）</title>
   <style>
-    body { font-family: system-ui, Arial; margin: 16px; }
-    table { border-collapse: collapse; width: 100%; font-size: 14px; }
-    th, td { border: 1px solid #ddd; padding: 6px 8px; white-space: nowrap; }
-    th { background: #f5f5f5; position: sticky; top: 0; }
+    :root{
+      --bg:#0b1020;
+      --bg2:#070a14;
+      --card: rgba(18,26,51,.92);
+      --card2: rgba(255,255,255,.06);
+      --text:#e8ecff;
+      --muted:#a9b2d6;
+      --line: rgba(255,255,255,.10);
+      --ok:#6ef2b6;
+      --warn:#ffd27a;
+      --bad:#ff8a8a;
+      --btn1:#2b3a75;
+      --btn2:#1e2a55;
+      --shadow: 0 10px 30px rgba(0,0,0,.28);
+      --radius: 16px;
+    }
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+      background: linear-gradient(180deg,var(--bg),var(--bg2));
+      color:var(--text);
+    }
+    a{ color:inherit; }
+    .container{ max-width: 980px; margin:0 auto; padding: 14px; }
+    .topbar{
+      position: sticky; top:0; z-index:50;
+      background: rgba(11,16,32,.78);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--line);
+    }
+    .topbar-inner{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px;
+      padding: 12px 14px;
+      max-width: 980px;
+      margin: 0 auto;
+    }
+    .brand{ display:flex; flex-direction:column; gap:2px; }
+    .brand .title{ font-weight: 900; letter-spacing:.2px; font-size: 16px; }
+    .brand .subtitle{ color: var(--muted); font-size: 12px; }
+    .row{ display:flex; gap:10px; flex-wrap:wrap; }
+    .btn{
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg,var(--btn1),var(--btn2));
+      color: var(--text);
+      padding: 9px 11px;
+      border-radius: 12px;
+      cursor:pointer;
+      font-weight: 700;
+      font-size: 13px;
+      box-shadow: 0 8px 20px rgba(0,0,0,.20);
+      user-select:none;
+    }
+    .btn.ghost{
+      background: rgba(255,255,255,.05);
+      box-shadow:none;
+    }
+    .btn.danger{
+      background: rgba(255,80,80,.14);
+    }
+    .btn:active{ transform: translateY(1px); }
+    .card{
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px;
+      box-shadow: var(--shadow);
+      margin-top: 14px;
+    }
+    .card h3{
+      margin:0 0 8px 0;
+      font-size: 14px;
+      letter-spacing:.2px;
+    }
+    .hint{
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .field{
+      grid-column: span 6;
+      display:flex; flex-direction:column; gap:6px;
+    }
+    .field.small{ grid-column: span 4; }
+    .field.tiny{ grid-column: span 3; }
+    .label{ font-size: 12px; color: var(--muted); }
+    .input, .select{
+      width:100%;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      padding: 10px 10px;
+      border-radius: 12px;
+      outline: none;
+      font-size: 14px;
+    }
+    .input::placeholder{ color: rgba(233,236,255,.35); }
+    .hr{ height:1px; background: var(--line); margin: 12px 0; }
+    .kpi-grid{
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .kpi{
+      grid-column: span 6;
+      background: rgba(255,255,255,.05);
+      border:1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+    }
+    .kpi .k{ color: var(--muted); font-size: 12px; }
+    .kpi .v{ font-weight: 900; font-size: 18px; margin-top: 4px; }
+    .badge{
+      display:inline-flex; align-items:center; gap:6px;
+      font-size: 12px; padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.06);
+      color: var(--muted);
+      margin-left: 8px;
+    }
+    .table-wrap{
+      overflow:auto;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.03);
+    }
+    table{ border-collapse: collapse; width:100%; font-size: 13px; min-width: 980px; }
+    th,td{
+      border: 1px solid rgba(255,255,255,.08);
+      padding: 8px 10px;
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+    th{
+      position: sticky; top:0;
+      background: rgba(18,26,51,.98);
+      z-index: 2;
+      text-align:left;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    td[contenteditable="true"]{
+      background: rgba(255,255,255,.04);
+      cursor: text;
+    }
+    .pill{
+      display:inline-flex; align-items:center; gap:6px;
+      padding: 4px 10px; border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.06);
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .min-ok{ color: var(--ok); font-weight: 800; }
+    .min-warn{ color: var(--warn); font-weight: 800; }
+    .min-bad{ color: var(--bad); font-weight: 800; }
+    .footer-note{ margin: 14px 0 30px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+    @media (max-width: 720px){
+      .field{ grid-column: span 12; }
+      .field.small, .field.tiny{ grid-column: span 12; }
+      .kpi{ grid-column: span 12; }
+      table{ min-width: 860px; }
+    }
   </style>
 </head>
+
 <body>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="title">Ready 助手 <span class="badge">PWA</span></div>
+        <div class="subtitle">数据只保存在本机浏览器（localStorage），不会上传到服务器</div>
+      </div>
+      <div class="row">
+        <button class="btn ghost" id="btnExport">导出JSON</button>
+        <button class="btn ghost" id="btnImport">导入JSON</button>
+        <button class="btn danger" id="btnReset">重置</button>
+      </div>
+    </div>
+  </div>
 
-<h2>Excel 表格展示</h2>
-<div id="output">初始化中…</div>
+  <div class="container">
 
-<!-- ✅ 确定存在的版本 -->
-<script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <div class="card">
+      <h3>汇率设置</h3>
+      <div class="grid">
+        <div class="field small">
+          <div class="label">USDC/CNY（1 USDC = ? CNY）</div>
+          <input class="input" id="rateUsdcCny" type="number" step="0.0001" placeholder="例如 7.20" />
+        </div>
+        <div class="field small">
+          <div class="label">Ready 返现（%）</div>
+          <input class="input" id="readyCashback" type="number" step="0.01" placeholder="例如 1.50" />
+        </div>
+        <div class="field small">
+          <div class="label">消费税（%）</div>
+          <input class="input" id="taxRate" type="number" step="0.01" placeholder="例如 10" />
+        </div>
+      </div>
+      <div class="hint" style="margin-top:10px;">
+        说明：免税 = YES 时，会按 <code>价格 / (1 + 税率)</code> 去掉税（与你之前的 Excel 逻辑一致）。
+        返现会按 Ready 成本的百分比抵扣。
+      </div>
+      <div class="hr"></div>
+      <div class="hint">
+        下面的“平台成本”模型做成可调：你可以按自己的 Excel 规则把费率填进去（默认给一个通用值）。
+        <br/>如你愿意，我也可以把你 Excel 的具体公式（Ready/VX/ZFB/Master 的计算方式）复刻到这里，让输出与 Excel 完全一致。
+      </div>
+      <div class="grid">
+        <div class="field tiny">
+          <div class="label">VX 手续费（%）</div>
+          <input class="input" id="feeVX" type="number" step="0.01" placeholder="例如 0" />
+        </div>
+        <div class="field tiny">
+          <div class="label">ZFB 手续费（%）</div>
+          <input class="input" id="feeZFB" type="number" step="0.01" placeholder="例如 0" />
+        </div>
+        <div class="field tiny">
+          <div class="label">Master 手续费（%）</div>
+          <input class="input" id="feeMaster" type="number" step="0.01" placeholder="例如 1.8" />
+        </div>
+        <div class="field tiny">
+          <div class="label">JPY→CNY（每 10000 JPY = ? CNY）</div>
+          <input class="input" id="jpyToCny10k" type="number" step="0.0001" placeholder="例如 480" />
+        </div>
+      </div>
+    </div>
 
-<script>
-(async function () {
-  const output = document.getElementById('output');
+    <div class="card">
+      <h3>添加商品</h3>
+      <div class="grid">
+        <div class="field small">
+          <div class="label">平台</div>
+          <select class="select" id="platform">
+            <option value="Auto">Auto（每行最优）</option>
+            <option value="Ready">Ready</option>
+            <option value="VX">VX</option>
+            <option value="ZFB">ZFB</option>
+            <option value="Master">Master</option>
+          </select>
+        </div>
+        <div class="field">
+          <div class="label">商品名</div>
+          <input class="input" id="name" placeholder="例如 Just ear / 耳机配件…" />
+        </div>
+        <div class="field small">
+          <div class="label">JPY（单价）</div>
+          <input class="input" id="jpy" type="number" step="1" placeholder="例如 98000" />
+        </div>
+        <div class="field tiny">
+          <div class="label">数量</div>
+          <input class="input" id="qty" type="number" step="1" placeholder="1" />
+        </div>
+        <div class="field tiny">
+          <div class="label">折扣幅度（%）</div>
+          <input class="input" id="discount" type="number" step="0.01" placeholder="例如 5" />
+        </div>
+        <div class="field tiny">
+          <div class="label">免税</div>
+          <select class="select" id="taxFree">
+            <option value="YES">YES</option>
+            <option value="NO" selected>NO</option>
+          </select>
+        </div>
+      </div>
+      <div class="row" style="margin-top:12px;">
+        <button class="btn" id="btnAdd">添加</button>
+        <button class="btn ghost" id="btnImportExcel">从 Excel 导入（可选）</button>
+        <input id="excelFile" type="file" accept=".xlsx,.xls" style="display:none;" />
+      </div>
+      <div class="hint" style="margin-top:10px;">
+        Excel 导入：默认读取第 1 个 Sheet。若表头包含：<code>平台</code> <code>商品名</code> <code>JPY</code> <code>数量</code> <code>折扣幅度</code> <code>免税</code>，会自动映射。
+        表头不一致也没关系：你导入后可以在表格里直接改（自动保存）。
+      </div>
+    </div>
 
-  try {
-    if (typeof XLSX === 'undefined') {
-      throw new Error('XLSX 库未加载');
+    <div class="card">
+      <h3>商品清单 <span class="badge">点击表格内数值可直接编辑（自动保存）</span></h3>
+
+      <div class="kpi-grid" id="kpis"></div>
+
+      <div class="hr"></div>
+
+      <div class="table-wrap">
+        <table id="tbl">
+          <thead>
+          <tr>
+            <th>#</th>
+            <th>平台</th>
+            <th>商品名</th>
+            <th>JPY</th>
+            <th>数量</th>
+            <th>折扣%</th>
+            <th>免税</th>
+            <th>Ready</th>
+            <th>VX</th>
+            <th>ZFB</th>
+            <th>Master</th>
+            <th>最优</th>
+            <th>最优平台</th>
+            <th>操作</th>
+          </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="footer-note">
+        iPhone 安装：Safari → 分享 → 添加到主屏幕。<br/>
+        注意：这里的“平台成本公式”目前是通用模型（折扣/免税/手续费/返现/汇率）。如果你把你 Excel 里 Ready/VX/ZFB/Master 的具体计算规则贴出来，我可以把这里改成与你 Excel 完全一致的结果。
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SheetJS：用稳定版本，避免 “version not found” -->
+  <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <script>
+    // -------------------------
+    // Storage
+    // -------------------------
+    const KEY = "ready_pwa_state_v1";
+
+    const defaultState = () => ({
+      settings: {
+        rateUsdcCny: 7.2,
+        readyCashback: 1.5,
+        taxRate: 10,
+        feeVX: 0,
+        feeZFB: 0,
+        feeMaster: 1.8,
+        jpyToCny10k: 480
+      },
+      items: []
+    });
+
+    function loadState(){
+      try{
+        const raw = localStorage.getItem(KEY);
+        if(!raw) return defaultState();
+        const s = JSON.parse(raw);
+        return {
+          settings: { ...defaultState().settings, ...(s.settings||{}) },
+          items: Array.isArray(s.items) ? s.items : []
+        };
+      }catch{
+        return defaultState();
+      }
     }
 
-    output.textContent = '正在下载 data.xlsx…';
-    const res = await fetch('./data.xlsx?v=' + Date.now(), { cache: 'no-store' });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
+    function saveState(){
+      localStorage.setItem(KEY, JSON.stringify(state));
+    }
 
-    const buf = await res.arrayBuffer();
-    output.textContent = `已下载 ${buf.byteLength} bytes，正在解析…`;
+    let state = loadState();
 
-    const wb = XLSX.read(buf, { type: 'array' });
-    const ws = wb.Sheets[wb.SheetNames[0]];
+    // -------------------------
+    // Helpers
+    // -------------------------
+    const $ = (id) => document.getElementById(id);
 
-    output.innerHTML = XLSX.utils.sheet_to_html(ws);
-  } catch (e) {
-    output.textContent = '错误：' + e.message;
-    console.error(e);
-  }
-})();
-</script>
+    function n(v, def=0){
+      const x = Number(v);
+      return Number.isFinite(x) ? x : def;
+    }
 
+    function fmtCny(x){
+      if(!Number.isFinite(x)) return "-";
+      return x.toFixed(2);
+    }
+
+    function calcRowCosts(item, settings){
+      // base JPY after qty & discount
+      const jpy = n(item.jpy);
+      const qty = Math.max(1, n(item.qty, 1));
+      const disc = Math.max(0, n(item.discount, 0)) / 100;
+
+      let gross = jpy * qty * (1 - disc);
+
+      // tax-free removes tax by / (1 + taxRate)
+      const taxRate = Math.max(0, n(settings.taxRate, 0)) / 100;
+      if(String(item.taxFree).toUpperCase() === "YES"){
+        gross = gross / (1 + taxRate);
+      }
+
+      // Convert JPY -> CNY using (per 10000 JPY = ? CNY)
+      const jpyToCny10k = Math.max(0, n(settings.jpyToCny10k, 0));
+      const baseCny = (gross / 10000) * jpyToCny10k;
+
+      // Fees
+      const feeVX = Math.max(0, n(settings.feeVX, 0)) / 100;
+      const feeZFB = Math.max(0, n(settings.feeZFB, 0)) / 100;
+      const feeMaster = Math.max(0, n(settings.feeMaster, 0)) / 100;
+
+      // Ready: assume pay via USDC -> CNY with cashback (model can be adjusted)
+      // We use baseCny as reference, then apply cashback as discount (reduce cost)
+      const cashback = Math.max(0, n(settings.readyCashback, 0)) / 100;
+      const ready = baseCny * (1 - cashback);
+
+      const vx = baseCny * (1 + feeVX);
+      const zfb = baseCny * (1 + feeZFB);
+      const master = baseCny * (1 + feeMaster);
+
+      const min = Math.min(ready, vx, zfb, master);
+      let minLabel = "Ready";
+      if(min === vx) minLabel = "VX";
+      if(min === zfb) minLabel = "ZFB";
+      if(min === master) minLabel = "Master";
+
+      return { baseCny, ready, vx, zfb, master, min, minLabel };
+    }
+
+    function esc(s){
+      return String(s ?? "").replace(/[&<>"']/g, (c) => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+      }[c]));
+    }
+
+    // -------------------------
+    // Bind settings inputs
+    // -------------------------
+    function syncSettingsToUI(){
+      const s = state.settings;
+      $("rateUsdcCny").value = s.rateUsdcCny;
+      $("readyCashback").value = s.readyCashback;
+      $("taxRate").value = s.taxRate;
+      $("feeVX").value = s.feeVX;
+      $("feeZFB").value = s.feeZFB;
+      $("feeMaster").value = s.feeMaster;
+      $("jpyToCny10k").value = s.jpyToCny10k;
+    }
+
+    function syncUIToSettings(){
+      state.settings.rateUsdcCny = n($("rateUsdcCny").value, 0);
+      state.settings.readyCashback = n($("readyCashback").value, 0);
+      state.settings.taxRate = n($("taxRate").value, 0);
+      state.settings.feeVX = n($("feeVX").value, 0);
+      state.settings.feeZFB = n($("feeZFB").value, 0);
+      state.settings.feeMaster = n($("feeMaster").value, 0);
+      state.settings.jpyToCny10k = n($("jpyToCny10k").value, 0);
+      saveState();
+      render();
+    }
+
+    ["rateUsdcCny","readyCashback","taxRate","feeVX","feeZFB","feeMaster","jpyToCny10k"].forEach(id=>{
+      $(id).addEventListener("input", syncUIToSettings);
+    });
+
+    // -------------------------
+    // Add item
+    // -------------------------
+    function addItem(){
+      const it = {
+        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random(),
+        platform: $("platform").value,
+        name: $("name").value.trim(),
+        jpy: n($("jpy").value, 0),
+        qty: Math.max(1, n($("qty").value, 1)),
+        discount: Math.max(0, n($("discount").value, 0)),
+        taxFree: $("taxFree").value
+      };
+      if(!it.name) it.name = "(未命名)";
+      state.items.unshift(it);
+      saveState();
+      render();
+    }
+
+    $("btnAdd").addEventListener("click", addItem);
+
+    // -------------------------
+    // Export / Import JSON / Reset
+    // -------------------------
+    $("btnExport").addEventListener("click", ()=>{
+      const blob = new Blob([JSON.stringify(state, null, 2)], {type:"application/json"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "ready-data.json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    $("btnImport").addEventListener("click", ()=>{
+      const inp = document.createElement("input");
+      inp.type = "file";
+      inp.accept = "application/json";
+      inp.onchange = async () => {
+        const f = inp.files && inp.files[0];
+        if(!f) return;
+        const txt = await f.text();
+        try{
+          const s = JSON.parse(txt);
+          // soft-merge
+          state = {
+            settings: { ...defaultState().settings, ...(s.settings||{}) },
+            items: Array.isArray(s.items) ? s.items : []
+          };
+          saveState();
+          syncSettingsToUI();
+          render();
+        }catch(e){
+          alert("JSON 解析失败：" + (e?.message || e));
+        }
+      };
+      inp.click();
+    });
+
+    $("btnReset").addEventListener("click", ()=>{
+      if(!confirm("确定重置？这会清空本机保存的数据。")) return;
+      state = defaultState();
+      saveState();
+      syncSettingsToUI();
+      render();
+    });
+
+    // -------------------------
+    // Excel Import (optional)
+    // -------------------------
+    $("btnImportExcel").addEventListener("click", ()=>{
+      if(typeof XLSX === "undefined"){
+        alert("XLSX 库未加载，无法导入 Excel。你可以稍后刷新或改用导入 JSON。");
+        return;
+      }
+      $("excelFile").value = "";
+      $("excelFile").click();
+    });
+
+    $("excelFile").addEventListener("change", async (e)=>{
+      const file = e.target.files && e.target.files[0];
+      if(!file) return;
+
+      try{
+        const buf = await file.arrayBuffer();
+        const wb = XLSX.read(buf, { type:"array" });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(ws, { defval:"" });
+
+        // header mapping (Chinese)
+        const map = (r, keys) => {
+          for(const k of keys){
+            if(k in r) return r[k];
+          }
+          return "";
+        };
+
+        const imported = rows.map(r => ({
+          id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random(),
+          platform: String(map(r, ["平台","platform","Platform"])).trim() || "Auto",
+          name: String(map(r, ["商品名","name","Name","商品"])).trim() || "(未命名)",
+          jpy: n(map(r, ["JPY","jpy","价格","单价"]), 0),
+          qty: Math.max(1, n(map(r, ["数量","qty","Qty"]), 1)),
+          discount: Math.max(0, n(map(r, ["折扣幅度","折扣","discount","Discount"]), 0)),
+          taxFree: String(map(r, ["免税","taxFree","TaxFree"])).toUpperCase() === "YES" ? "YES" : "NO"
+        }));
+
+        state.items = imported.concat(state.items);
+        saveState();
+        render();
+        alert(`已导入 ${imported.length} 行（第 1 个 Sheet）。`);
+      }catch(err){
+        alert("导入失败：" + (err?.message || err));
+      }
+    });
+
+    // -------------------------
+    // Render
+    // -------------------------
+    function renderKpis(){
+      const s = state.settings;
+      let sumBest = 0, sumReady = 0, sumVX = 0, sumZFB = 0, sumMaster = 0;
+
+      for(const it of state.items){
+        const c = calcRowCosts(it, s);
+        sumBest += c.min;
+        sumReady += c.ready;
+        sumVX += c.vx;
+        sumZFB += c.zfb;
+        sumMaster += c.master;
+      }
+
+      const kpis = [
+        {k:"合计（按每行最优）", v: fmtCny(sumBest)},
+        {k:"合计（Ready）", v: fmtCny(sumReady)},
+        {k:"合计（VX）", v: fmtCny(sumVX)},
+        {k:"合计（ZFB）", v: fmtCny(sumZFB)},
+        {k:"合计（Master）", v: fmtCny(sumMaster)},
+      ];
+
+      $("kpis").innerHTML = kpis.map(x=>`
+        <div class="kpi">
+          <div class="k">${esc(x.k)}</div>
+          <div class="v">${esc(x.v)}</div>
+        </div>
+      `).join("");
+    }
+
+    function renderTable(){
+      const s = state.settings;
+      const tbody = $("tbody");
+
+      tbody.innerHTML = state.items.map((it, idx)=>{
+        const c = calcRowCosts(it, s);
+
+        const minClass = c.minLabel==="Ready" ? "min-ok" :
+                         c.minLabel==="VX" ? "min-warn" :
+                         c.minLabel==="ZFB" ? "min-ok" :
+                         "min-bad";
+
+        return `
+          <tr data-id="${esc(it.id)}">
+            <td>${idx+1}</td>
+            <td contenteditable="true" data-k="platform"><span class="pill">${esc(it.platform)}</span></td>
+            <td contenteditable="true" data-k="name">${esc(it.name)}</td>
+            <td contenteditable="true" data-k="jpy">${esc(it.jpy)}</td>
+            <td contenteditable="true" data-k="qty">${esc(it.qty)}</td>
+            <td contenteditable="true" data-k="discount">${esc(it.discount)}</td>
+            <td contenteditable="true" data-k="taxFree">${esc(it.taxFree)}</td>
+
+            <td>${fmtCny(c.ready)}</td>
+            <td>${fmtCny(c.vx)}</td>
+            <td>${fmtCny(c.zfb)}</td>
+            <td>${fmtCny(c.master)}</td>
+
+            <td class="${minClass}">${fmtCny(c.min)}</td>
+            <td class="${minClass}">${esc(c.minLabel)}</td>
+            <td><button class="btn ghost" data-act="del">删除</button></td>
+          </tr>
+        `;
+      }).join("");
+
+      // delete
+      tbody.querySelectorAll('button[data-act="del"]').forEach(btn=>{
+        btn.addEventListener("click", (e)=>{
+          const tr = e.target.closest("tr");
+          const id = tr?.getAttribute("data-id");
+          if(!id) return;
+          state.items = state.items.filter(x=>x.id !== id);
+          saveState();
+          render();
+        });
+      });
+
+      // inline edit (contenteditable)
+      tbody.querySelectorAll('[contenteditable="true"]').forEach(cell=>{
+        cell.addEventListener("blur", (e)=>{
+          const td = e.target;
+          const tr = td.closest("tr");
+          const id = tr.getAttribute("data-id");
+          const k = td.getAttribute("data-k");
+          let val = td.innerText.trim();
+
+          const it = state.items.find(x=>x.id === id);
+          if(!it) return;
+
+          if(k === "jpy" || k === "qty" || k === "discount"){
+            it[k] = n(val, 0);
+            if(k === "qty") it[k] = Math.max(1, it[k]);
+            if(k === "discount") it[k] = Math.max(0, it[k]);
+          }else if(k === "taxFree"){
+            it.taxFree = String(val).toUpperCase() === "YES" ? "YES" : "NO";
+          }else if(k === "platform"){
+            // allow plain text edit
+            const v = val.replace(/\s+/g,"");
+            it.platform = v || "Auto";
+          }else{
+            it[k] = val || "";
+          }
+
+          saveState();
+          render();
+        });
+      });
+    }
+
+    function render(){
+      renderKpis();
+      renderTable();
+    }
+
+    // init
+    syncSettingsToUI();
+    render();
+  </script>
 </body>
 </html>
