@@ -41,13 +41,11 @@
       display:flex; align-items:center; justify-content:space-between;
       gap:12px; padding: 12px 14px;
       max-width: 1080px; margin: 0 auto;
+      flex-wrap: wrap;
     }
 
     /* Author block */
-    .author{
-      display:flex; align-items:center; gap:10px;
-      min-width: 220px;
-    }
+    .author{ display:flex; align-items:center; gap:10px; min-width: 220px; }
     .avatar{
       width: 34px; height: 34px; border-radius: 50%;
       border: 1px solid var(--line);
@@ -208,14 +206,8 @@
       padding:6px 10px;
       font-size:12px;
     }
-    .toggle button[data-v="NO"].active{
-      background: var(--red);
-      color: #fff;
-    }
-    .toggle button[data-v="YES"].active{
-      background: var(--green);
-      color: #fff;
-    }
+    .toggle button[data-v="NO"].active{ background: var(--red); color: #fff; }
+    .toggle button[data-v="YES"].active{ background: var(--green); color: #fff; }
     .toggle button:not(.active){
       color: rgba(233,236,255,.55);
       background: rgba(255,255,255,.03);
@@ -267,7 +259,6 @@
       grid-template-columns: repeat(12, 1fr);
       gap: 12px;
     }
-
     .fx-box{
       grid-column: span 4;
       border: 1px solid var(--line);
@@ -275,7 +266,6 @@
       border-radius: 16px;
       padding: 12px;
     }
-
     .fx-box .fx-title{
       display:flex;
       align-items:flex-start;
@@ -283,31 +273,26 @@
       gap: 10px;
       margin-bottom: 10px;
     }
-
     .fx-box .fx-title b{
       font-size: 12px;
       letter-spacing:.2px;
       color: rgba(233,236,255,.90);
     }
-
     .fx-box .fx-sub{
       font-size: 12px;
       color: var(--muted);
       margin-top: 3px;
     }
-
     .fx-form{
       display: grid;
       grid-template-columns: 1fr;
       gap: 10px;
     }
-
     .fx-row{
       display:flex;
       flex-direction:column;
       gap:6px;
     }
-
     .fx-label{
       font-size: 12px;
       color: var(--muted);
@@ -316,7 +301,6 @@
       justify-content:space-between;
       gap: 10px;
     }
-
     .fx-tools{
       display:flex;
       align-items:center;
@@ -325,7 +309,6 @@
       flex-wrap: wrap;
       min-width: 240px;
     }
-
     .fx-dual{
       display:grid;
       grid-template-columns: 1fr 1fr;
@@ -353,11 +336,7 @@
       user-select:none;
       white-space: nowrap;
     }
-    .fx-dot{
-      width: 8px; height: 8px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.25);
-    }
+    .fx-dot{ width: 8px; height: 8px; border-radius: 999px; background: rgba(255,255,255,.25); }
     .fx-status.on{
       border-color: rgba(255,59,59,.55);
       background: rgba(255,59,59,.14);
@@ -374,18 +353,11 @@
     @media (max-width: 980px){
       .fx-box{ grid-column: span 6; }
     }
-
-    @media (max-width: 880px){
-      .author{ min-width: unset; }
-      table{ min-width: 1150px; }
-    }
-
     @media (max-width: 720px){
       .field{ grid-column: span 12; }
       .field.small, .field.tiny{ grid-column: span 12; }
       .kpi{ grid-column: span 12; }
       table{ min-width: 1120px; }
-      .topbar-inner{ flex-wrap: wrap; }
 
       .fx-box{ grid-column: span 12; }
       .fx-tools{ min-width: unset; justify-content:flex-start; }
@@ -428,7 +400,6 @@
     <div class="card">
       <h3>汇率 / 参数（对齐 Excel V1）</h3>
 
-      <!-- redesigned FX area (no element removed, only rearranged) -->
       <div class="fx-area">
 
         <!-- ① Mastercard -->
@@ -458,7 +429,7 @@
           </div>
         </div>
 
-        <!-- ② Channels (Alipay / Wechat) -->
+        <!-- ② Channels -->
         <div class="fx-box">
           <div class="fx-title">
             <div>
@@ -468,10 +439,10 @@
 
             <div class="fx-status-wrap">
               <span class="fx-status off" id="fxstatus-alipay" title="Alipay 模式">
-                <span class="fx-dot"></span><span>Alipay: OFF</span>
+                <span class="fx-dot"></span><span id="fxstatus-alipay-text">Alipay: OFF</span>
               </span>
               <span class="fx-status off" id="fxstatus-wechat" title="Wechat 模式">
-                <span class="fx-dot"></span><span>Wechat: OFF</span>
+                <span class="fx-dot"></span><span id="fxstatus-wechat-text">Wechat: OFF</span>
               </span>
             </div>
           </div>
@@ -518,7 +489,7 @@
           </div>
         </div>
 
-        <!-- ③ USDT/CNY + wear + USDC/CNY -->
+        <!-- ③ USDT/USDC -->
         <div class="fx-box">
           <div class="fx-title">
             <div>
@@ -538,7 +509,6 @@
                 <div class="fx-label">提U磨损</div>
                 <input class="input" id="usdtDiv1" type="number" step="0.0001" />
               </div>
-
               <div class="fx-row">
                 <div class="fx-label">T/C磨损</div>
                 <input class="input" id="usdtDiv2" type="number" step="0.0001" />
@@ -552,7 +522,7 @@
           </div>
         </div>
 
-        <!-- ④ cashback / tax -->
+        <!-- ④ cashback/tax -->
         <div class="fx-box">
           <div class="fx-title">
             <div>
@@ -606,4 +576,714 @@
         </div>
 
         <div class="field tiny">
-          <div class
+          <div class="label">数量</div>
+          <input class="input" id="qty" type="number" step="1" placeholder="1" />
+        </div>
+
+        <div class="field tiny">
+          <div class="label">优惠幅度（%）</div>
+          <input class="input" id="promoOffPct" type="number" step="0.01" placeholder="例如 15" />
+        </div>
+
+        <div class="field tiny">
+          <div class="label">是否免税</div>
+          <div class="toggle" id="taxFreeToggle">
+            <button type="button" data-v="NO" class="active">NO</button>
+            <button type="button" data-v="YES">YES</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:12px;">
+        <button class="btn" id="btnAdd">添加</button>
+        <button class="btn ghost" id="btnImportExcel">从 Excel 导入</button>
+        <input id="excelFile" type="file" accept=".xlsx,.xls" style="display:none;" />
+      </div>
+
+      <div class="hint" style="margin-top:10px;">
+        Excel 导入：读取第 1 个 Sheet。若折扣列是“0.85 / 85（表示支付85%）”，会自动转换成“优惠15%”。
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>清单 <span class="badge">点击单元格可编辑（自动保存）</span></h3>
+
+      <div class="kpi-grid" id="kpis"></div>
+
+      <div class="hr"></div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+          <tr>
+            <th>#</th>
+            <th>平台</th>
+            <th>商品分类</th>
+            <th>商品名</th>
+            <th>JPY</th>
+            <th>数量</th>
+            <th>优惠%</th>
+            <th>免税</th>
+            <th>最优价格</th>
+            <th>最优解</th>
+            <th>RMB/SELL</th>
+            <th>PROFIT</th>
+            <th>原价/Master</th>
+            <th>操作</th>
+          </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="hint" style="margin-top:12px;">
+        最优解：在 Ready / VX / ZFB / Master 中取最小值；并列时按 Ready → VX → ZFB → Master 的优先级输出。
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <script>
+    const KEY = "ready_v1_state_final_fx_auto_pct_v2";
+    const FXMODE_KEY = "fx_mode_v2"; // {alipay:"manual|auto", wechat:"manual|auto"}
+
+    const defaultState = () => ({
+      settings: {
+        mJpyPer10kUsdc: 63.9,
+        mJpyPer10kRmb: 443.49,
+        zJpyPer10kRmb: 444.65, // Alipay 手动值
+        vJpyPer10kRmb: 443.86, // Wechat 手动值
+        usdtCny: 6.97,
+        usdtDiv1: 0.9986, // 提U磨损
+        usdtDiv2: 0.9945, // T/C磨损
+        cashbackPct: 3,
+        taxRatePct: 10,
+        sellJpyPer10kRmb: 500,
+
+        // 方案1：抓取价微调系数（%）
+        alipayAutoPct: 100.04,
+        wechatAutoPct: 97.73
+      },
+      items: []
+    });
+
+    function loadState(){
+      try{
+        const raw = localStorage.getItem(KEY);
+        if(!raw) return defaultState();
+        const s = JSON.parse(raw);
+        return {
+          settings: { ...defaultState().settings, ...(s.settings||{}) },
+          items: Array.isArray(s.items) ? s.items : []
+        };
+      }catch{
+        return defaultState();
+      }
+    }
+
+    let state = loadState();
+    function saveState(){ localStorage.setItem(KEY, JSON.stringify(state)); }
+
+    const fxMode = (() => {
+      try { return JSON.parse(localStorage.getItem(FXMODE_KEY) || "{}"); }
+      catch { return {}; }
+    })();
+
+    let lastRaw = { alipay: NaN, wechat: NaN, fetchedAt: "" };
+
+    const $ = (id) => document.getElementById(id);
+    const n = (v, def=0) => { const x = Number(v); return Number.isFinite(x) ? x : def; };
+    const esc = (s)=> String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    const fmt = (x)=> Number.isFinite(x) ? x.toFixed(2) : "";
+    const fmt4 = (x)=> Number.isFinite(x) ? x.toFixed(4) : "";
+    const clamp = (x, lo, hi) => Math.min(hi, Math.max(lo, x));
+
+    function toPct(v, defaultPct){
+      const x = n(v, NaN);
+      if(!Number.isFinite(x)) return defaultPct;
+      if(x <= 0) return defaultPct;
+      if(x <= 1.5) return x * 100;
+      return x;
+    }
+
+    function payToOffPct(v, defaultOff=0){
+      const payPct = toPct(v, 100);
+      return clamp(100 - payPct, 0, 100);
+    }
+
+    function toOffPct(v, defaultOff=0){
+      const x = n(v, NaN);
+      if(!Number.isFinite(x)) return defaultOff;
+      if(x < 0) return 0;
+      if(x <= 1.5) return clamp(x * 100, 0, 100);
+      return clamp(x, 0, 100);
+    }
+
+    function calcUsdcCny(s){
+      const div1 = n(s.usdtDiv1, 0.9986);
+      const div2 = n(s.usdtDiv2, 0.9945);
+      return n(s.usdtCny,0) / div1 / div2;
+    }
+
+    // Add item tax toggle
+    function setTaxFreeToggle(v){
+      const val = String(v||'NO').toUpperCase()==='YES' ? 'YES' : 'NO';
+      document.querySelectorAll('#taxFreeToggle button').forEach(b=>{
+        b.classList.toggle('active', b.getAttribute('data-v') === val);
+      });
+    }
+    function getTaxFreeFromToggle(){
+      const el = document.querySelector('#taxFreeToggle button.active');
+      return el ? el.getAttribute('data-v') : 'NO';
+    }
+    document.getElementById('taxFreeToggle').addEventListener('click', (e)=>{
+      const btn = e.target.closest('button[data-v]');
+      if(!btn) return;
+      setTaxFreeToggle(btn.getAttribute('data-v'));
+    });
+
+    // FX Mode
+    function updateFxStatus(){
+      const a = (fxMode.alipay || "manual") === "auto";
+      const w = (fxMode.wechat || "manual") === "auto";
+
+      const aBox = $("fxstatus-alipay");
+      const wBox = $("fxstatus-wechat");
+      const aText = $("fxstatus-alipay-text");
+      const wText = $("fxstatus-wechat-text");
+
+      if(aBox && aText){
+        aBox.classList.toggle("on", a);
+        aBox.classList.toggle("off", !a);
+        aText.textContent = `Alipay: ${a ? "ON" : "OFF"}`;
+      }
+      if(wBox && wText){
+        wBox.classList.toggle("on", w);
+        wBox.classList.toggle("off", !w);
+        wText.textContent = `Wechat: ${w ? "ON" : "OFF"}`;
+      }
+    }
+
+    function setFxMode(which, mode){
+      fxMode[which] = mode;
+      localStorage.setItem(FXMODE_KEY, JSON.stringify(fxMode));
+      applyFxMode();
+      updateFxHints();
+      updateFxStatus();
+      if(mode === "auto") refreshAutoRates();
+    }
+
+    function applyFxMode(){
+      document.querySelectorAll(".fxmode").forEach(box=>{
+        const which = box.getAttribute("data-fx");
+        const mode = fxMode[which] || "manual";
+        const manualBtn = box.querySelector(".manual");
+        const autoBtn = box.querySelector(".auto");
+        manualBtn.classList.toggle("active", mode === "manual");
+        autoBtn.classList.toggle("active", mode === "auto");
+
+        const inputId = which === "alipay" ? "zJpyPer10kRmb" : "vJpyPer10kRmb";
+        const input = document.getElementById(inputId);
+        if(input) input.disabled = (mode === "auto");
+      });
+      updateFxStatus();
+    }
+
+    document.querySelectorAll(".fxmode").forEach(box=>{
+      box.addEventListener("click",(e)=>{
+        const which = box.getAttribute("data-fx");
+        if(e.target.classList.contains("manual")) setFxMode(which, "manual");
+        if(e.target.classList.contains("auto")) setFxMode(which, "auto");
+      });
+    });
+
+    function updateFxHints(){
+      const alipayHint = $("fxhint-alipay");
+      const wechatHint = $("fxhint-wechat");
+
+      const modeA = fxMode.alipay || "manual";
+      const modeW = fxMode.wechat || "manual";
+
+      const aPct = n(state.settings.alipayAutoPct ?? 100.04, 100.04);
+      const wPct = n(state.settings.wechatAutoPct ?? 97.73, 97.73);
+
+      const aRaw = lastRaw.alipay;
+      const wRaw = lastRaw.wechat;
+      const t = lastRaw.fetchedAt ? ` · ${lastRaw.fetchedAt}` : "";
+
+      if(modeA === "auto" && Number.isFinite(aRaw)){
+        alipayHint.style.display = "inline-flex";
+        alipayHint.textContent = `raw ${fmt4(aRaw)} × ${aPct.toFixed(2)}%${t}`;
+      }else{
+        alipayHint.style.display = "none";
+        alipayHint.textContent = "";
+      }
+
+      if(modeW === "auto" && Number.isFinite(wRaw)){
+        wechatHint.style.display = "inline-flex";
+        wechatHint.textContent = `raw ${fmt4(wRaw)} × ${wPct.toFixed(2)}%${t}`;
+      }else{
+        wechatHint.style.display = "none";
+        wechatHint.textContent = "";
+      }
+    }
+
+    function calcRow(it, s){
+      const jpy = n(it.jpy, 0);
+      const qty = Math.max(1, n(it.qty, 1));
+
+      const offPct = toOffPct(it.promoOffPct, 0);
+      const payFactor = 1 - (offPct / 100);
+
+      const taxFree = String(it.taxFree||"NO").toUpperCase() === "YES";
+      const taxRatePct = toPct(s.taxRatePct, 10);
+      const taxDivisor = 1 + (taxRatePct / 100);
+
+      const jpyDiscount = jpy * payFactor * qty;
+      const jpyTax = taxFree ? (jpyDiscount / taxDivisor) : jpyDiscount;
+
+      const usdcCny = calcUsdcCny(s);
+      const usdcM = jpyTax * (n(s.mJpyPer10kUsdc,0) / 10000);
+      const rmbU = usdcM * usdcCny;
+      const cashbackPct = toPct(s.cashbackPct, 3);
+      const cashback = rmbU * (cashbackPct / 100);
+      const ready = rmbU - cashback;
+
+      const vx = jpyTax * (n(s.vJpyPer10kRmb,0) / 10000);
+      const zfb = jpyTax * (n(s.zJpyPer10kRmb,0) / 10000);
+      const master = jpyTax * (n(s.mJpyPer10kRmb,0) / 10000);
+
+      const min = Math.min(ready, vx, zfb, master);
+      let minLabel = "Master";
+      if (ready === min) minLabel = "Ready";
+      else if (vx === min) minLabel = "VX";
+      else if (zfb === min) minLabel = "ZFB";
+      else minLabel = "Master";
+
+      const sell = jpy * (n(s.sellJpyPer10kRmb,0) / 10000) * qty;
+      const profit = sell - min;
+      const originMaster = jpy * (n(s.mJpyPer10kRmb,0) / 10000) * qty;
+
+      return { min, minLabel, sell, profit, originMaster };
+    }
+
+    function syncSettingsToUI(){
+      const s = state.settings;
+      $("mJpyPer10kUsdc").value = s.mJpyPer10kUsdc;
+      $("mJpyPer10kRmb").value  = s.mJpyPer10kRmb;
+      $("zJpyPer10kRmb").value  = s.zJpyPer10kRmb;
+      $("vJpyPer10kRmb").value  = s.vJpyPer10kRmb;
+      $("usdtCny").value        = s.usdtCny;
+      $("usdtDiv1").value       = s.usdtDiv1;
+      $("usdtDiv2").value       = s.usdtDiv2;
+      $("cashbackPct").value    = s.cashbackPct;
+      $("taxRatePct").value     = s.taxRatePct;
+      $("sellJpyPer10kRmb").value = s.sellJpyPer10kRmb;
+
+      $("alipayAutoPct").value = (s.alipayAutoPct ?? 100.04);
+      $("wechatAutoPct").value = (s.wechatAutoPct ?? 97.73);
+
+      $("usdcCny").value = calcUsdcCny(s).toFixed(6);
+    }
+
+    function syncUIToSettings(){
+      const s = state.settings;
+      s.mJpyPer10kUsdc = n($("mJpyPer10kUsdc").value, 0);
+      s.mJpyPer10kRmb  = n($("mJpyPer10kRmb").value, 0);
+      s.zJpyPer10kRmb  = n($("zJpyPer10kRmb").value, 0);
+      s.vJpyPer10kRmb  = n($("vJpyPer10kRmb").value, 0);
+      s.usdtCny        = n($("usdtCny").value, 0);
+      s.usdtDiv1       = n($("usdtDiv1").value, 0.9986);
+      s.usdtDiv2       = n($("usdtDiv2").value, 0.9945);
+      s.cashbackPct    = n($("cashbackPct").value, 0);
+      s.taxRatePct     = n($("taxRatePct").value, 0);
+      s.sellJpyPer10kRmb = n($("sellJpyPer10kRmb").value, 0);
+
+      s.alipayAutoPct  = n($("alipayAutoPct").value, 100.04);
+      s.wechatAutoPct  = n($("wechatAutoPct").value, 97.73);
+
+      $("usdcCny").value = calcUsdcCny(s).toFixed(6);
+
+      saveState();
+      render();
+      updateFxHints();
+
+      if((fxMode.alipay||"manual")==="auto" || (fxMode.wechat||"manual")==="auto"){
+        refreshAutoRates();
+      }
+    }
+
+    [
+      "mJpyPer10kUsdc","mJpyPer10kRmb","zJpyPer10kRmb","vJpyPer10kRmb",
+      "usdtCny","usdtDiv1","usdtDiv2",
+      "cashbackPct","taxRatePct","sellJpyPer10kRmb",
+      "alipayAutoPct","wechatAutoPct"
+    ].forEach(id => $(id).addEventListener("input", syncUIToSettings));
+
+    function migrateItems(){
+      for(const it of state.items){
+        if(it.category == null) it.category = "";
+        if(it.promoOffPct == null){
+          if(it.discountPct != null){
+            it.promoOffPct = payToOffPct(it.discountPct, 0);
+            delete it.discountPct;
+          }else if(it.discountFactor != null){
+            it.promoOffPct = payToOffPct(it.discountFactor, 0);
+            delete it.discountFactor;
+          }else{
+            it.promoOffPct = 0;
+          }
+        }else{
+          it.promoOffPct = toOffPct(it.promoOffPct, 0);
+        }
+      }
+      saveState();
+    }
+
+    function addItem(){
+      const it = {
+        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random(),
+        platform: ($("platform").value || "").trim(),
+        category: ($("category").value || "").trim(),
+        name: ($("name").value || "").trim() || "(未命名)",
+        jpy: n($("jpy").value, 0),
+        qty: Math.max(1, n($("qty").value, 1)),
+        promoOffPct: toOffPct($("promoOffPct").value, 0),
+        taxFree: getTaxFreeFromToggle()
+      };
+      state.items.unshift(it);
+      saveState();
+      render();
+    }
+    $("btnAdd").addEventListener("click", addItem);
+
+    $("btnExport").addEventListener("click", ()=>{
+      const blob = new Blob([JSON.stringify(state, null, 2)], {type:"application/json"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = "ready-v1.json";
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    $("btnImport").addEventListener("click", ()=>{
+      const inp = document.createElement("input");
+      inp.type = "file"; inp.accept = "application/json";
+      inp.onchange = async () => {
+        const f = inp.files && inp.files[0];
+        if(!f) return;
+        try{
+          const s = JSON.parse(await f.text());
+          state = {
+            settings: { ...defaultState().settings, ...(s.settings||{}) },
+            items: Array.isArray(s.items) ? s.items : []
+          };
+          saveState();
+          migrateItems();
+          syncSettingsToUI();
+          render();
+          updateFxHints();
+          updateFxStatus();
+        }catch(e){
+          alert("JSON 解析失败：" + (e?.message || e));
+        }
+      };
+      inp.click();
+    });
+
+    $("btnReset").addEventListener("click", ()=>{
+      if(!confirm("确定重置？会清空本机保存数据。")) return;
+      state = defaultState();
+      saveState();
+      syncSettingsToUI();
+      setTaxFreeToggle("NO");
+
+      fxMode.alipay = "manual";
+      fxMode.wechat = "manual";
+      localStorage.setItem(FXMODE_KEY, JSON.stringify(fxMode));
+      applyFxMode();
+
+      render();
+      updateFxHints();
+      updateFxStatus();
+    });
+
+    $("btnImportExcel").addEventListener("click", ()=>{
+      if(typeof XLSX === "undefined"){
+        alert("XLSX 库未加载，无法导入。");
+        return;
+      }
+      $("excelFile").value = "";
+      $("excelFile").click();
+    });
+
+    $("excelFile").addEventListener("change", async (e)=>{
+      const file = e.target.files && e.target.files[0];
+      if(!file) return;
+      try{
+        const buf = await file.arrayBuffer();
+        const wb = XLSX.read(buf, { type:"array" });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(ws, { defval:"" });
+
+        const pick = (r, keys) => {
+          for(const k of keys){ if(k in r) return r[k]; }
+          return "";
+        };
+
+        const imported = rows.map(r => {
+          const rawDisc = pick(r, ["优惠幅度","优惠%","promoOffPct","PromoOffPct", "折扣幅度","折扣","discountPct","DiscountPct","discountFactor","DiscountFactor"]);
+          let offPct = 0;
+
+          const hasPromoHeader =
+            ("优惠幅度" in r) || ("优惠%" in r) || ("promoOffPct" in r) || ("PromoOffPct" in r);
+
+          offPct = hasPromoHeader ? toOffPct(rawDisc, 0) : payToOffPct(rawDisc, 0);
+
+          return ({
+            id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random(),
+            platform: String(pick(r, ["平台","platform","Platform"])).trim(),
+            category: String(pick(r, ["商品分类","分类","category","Category"])).trim(),
+            name: String(pick(r, ["商品名","商品","name","Name"])).trim() || "(未命名)",
+            jpy: n(pick(r, ["JPY","jpy","单价","价格"]), 0),
+            qty: Math.max(1, n(pick(r, ["数量","qty","Qty"]), 1)),
+            promoOffPct: offPct,
+            taxFree: String(pick(r, ["是否免税","免税","taxFree","TaxFree"])).toUpperCase()==="YES" ? "YES" : "NO"
+          });
+        }).filter(x => x.jpy || x.name);
+
+        state.items = imported.concat(state.items);
+        saveState();
+        render();
+        alert(`已导入 ${imported.length} 行（第 1 个 Sheet）。`);
+      }catch(err){
+        alert("导入失败：" + (err?.message || err));
+      }
+    });
+
+    function renderKpis(){
+      const s = state.settings;
+      let sumMin=0,sumSell=0,sumProfit=0,sumOriginMaster=0;
+
+      for(const it of state.items){
+        const c = calcRow(it, s);
+        sumMin += c.min;
+        sumSell += c.sell;
+        sumProfit += c.profit;
+        sumOriginMaster += c.originMaster;
+      }
+
+      const kpis = [
+        {k:"合计（最优价格）", v: fmt(sumMin)},
+        {k:"合计（SELL）", v: fmt(sumSell)},
+        {k:"合计（PROFIT）", v: fmt(sumProfit)},
+        {k:"合计（原价/Master）", v: fmt(sumOriginMaster)}
+      ];
+
+      $("kpis").innerHTML = kpis.map(x=>`
+        <div class="kpi">
+          <div class="k">${esc(x.k)}</div>
+          <div class="v">${esc(x.v)}</div>
+        </div>
+      `).join("");
+    }
+
+    function renderTable(){
+      const s = state.settings;
+      const tb = $("tbody");
+
+      tb.innerHTML = state.items.map((it, idx)=>{
+        const c = calcRow(it, s);
+
+        const minClass =
+          c.minLabel==="Ready" ? "min-ok" :
+          c.minLabel==="VX" ? "min-warn" :
+          c.minLabel==="ZFB" ? "min-ok" : "min-bad";
+
+        return `
+          <tr data-id="${esc(it.id)}">
+            <td>${idx+1}</td>
+            <td contenteditable="true" data-k="platform"><span class="pill">${esc(it.platform||"")}</span></td>
+            <td contenteditable="true" data-k="category">${esc(it.category||"")}</td>
+            <td contenteditable="true" data-k="name">${esc(it.name)}</td>
+            <td contenteditable="true" data-k="jpy">${esc(it.jpy)}</td>
+            <td contenteditable="true" data-k="qty">${esc(it.qty)}</td>
+            <td contenteditable="true" data-k="promoOffPct">${esc(toOffPct(it.promoOffPct,0))}</td>
+
+            <td>
+              <div class="toggle small" data-k="taxFreeToggleRow">
+                <button type="button" data-v="NO" class="${String(it.taxFree).toUpperCase()==='YES' ? '' : 'active'}">NO</button>
+                <button type="button" data-v="YES" class="${String(it.taxFree).toUpperCase()==='YES' ? 'active' : ''}">YES</button>
+              </div>
+            </td>
+
+            <td class="${minClass}">${fmt(c.min)}</td>
+            <td class="${minClass}">${esc(c.minLabel)}</td>
+
+            <td>${fmt(c.sell)}</td>
+            <td class="${c.profit>=0 ? "min-ok":"min-bad"}">${fmt(c.profit)}</td>
+            <td>${fmt(c.originMaster)}</td>
+
+            <td><button class="btn ghost" data-act="del">删除</button></td>
+          </tr>
+        `;
+      }).join("");
+
+      tb.querySelectorAll('button[data-act="del"]').forEach(btn=>{
+        btn.addEventListener("click", (e)=>{
+          const tr = e.target.closest("tr");
+          const id = tr?.getAttribute("data-id");
+          if(!id) return;
+          state.items = state.items.filter(x=>x.id !== id);
+          saveState();
+          render();
+        });
+      });
+
+      tb.querySelectorAll('[data-k="taxFreeToggleRow"]').forEach(box=>{
+        box.addEventListener('click', (e)=>{
+          const btn = e.target.closest('button[data-v]');
+          if(!btn) return;
+          const tr = e.target.closest('tr');
+          const id = tr?.getAttribute('data-id');
+          if(!id) return;
+
+          const it = state.items.find(x=>x.id === id);
+          if(!it) return;
+
+          it.taxFree = btn.getAttribute('data-v');
+          saveState();
+          render();
+        });
+      });
+
+      tb.querySelectorAll('[contenteditable="true"]').forEach(cell=>{
+        cell.addEventListener("blur", (e)=>{
+          const td = e.target;
+          const tr = td.closest("tr");
+          const id = tr.getAttribute("data-id");
+          const k = td.getAttribute("data-k");
+          const val = td.innerText.trim();
+
+          const it = state.items.find(x=>x.id === id);
+          if(!it) return;
+
+          if(k === "jpy" || k === "qty"){
+            it[k] = n(val, 0);
+            if(k === "qty") it[k] = Math.max(1, it[k]);
+          }else if(k === "promoOffPct"){
+            it.promoOffPct = toOffPct(val, 0);
+          }else{
+            it[k] = val;
+          }
+
+          saveState();
+          render();
+        });
+      });
+    }
+
+    function render(){
+      $("usdcCny").value = calcUsdcCny(state.settings).toFixed(6);
+      renderKpis();
+      renderTable();
+      updateFxHints();
+      updateFxStatus();
+    }
+
+    async function fetchRatesJson(){
+      const resp = await fetch("./rates.json?v=" + Date.now(), { cache: "no-store" });
+      if(!resp.ok) throw new Error("rates.json fetch failed: " + resp.status);
+      return await resp.json();
+    }
+
+    async function refreshAutoRates(){
+      try{
+        const r = await fetchRatesJson();
+
+        const rawAlipay = Number(r.alipay_jpy_per_10k_rmb);
+        const rawWechat = Number(r.wechat_jpy_per_10k_rmb);
+
+        lastRaw.alipay = rawAlipay;
+        lastRaw.wechat = rawWechat;
+
+        if(r.fetched_at_utc){
+          const d = new Date(r.fetched_at_utc);
+          lastRaw.fetchedAt = !isNaN(d.getTime()) ? d.toLocaleString() : String(r.fetched_at_utc);
+        }else{
+          lastRaw.fetchedAt = "";
+        }
+
+        const aPct = n(state.settings.alipayAutoPct ?? 100.04, 100.04) / 100;
+        const wPct = n(state.settings.wechatAutoPct ?? 97.73, 97.73) / 100;
+
+        const alipayAdj = Number.isFinite(rawAlipay) ? (rawAlipay * aPct) : NaN;
+        const wechatAdj = Number.isFinite(rawWechat) ? (rawWechat * wPct) : NaN;
+
+        if(Number.isFinite(alipayAdj) && (fxMode.alipay || "manual") === "auto"){
+          $("zJpyPer10kRmb").value = alipayAdj.toFixed(4);
+        }
+        if(Number.isFinite(wechatAdj) && (fxMode.wechat || "manual") === "auto"){
+          $("vJpyPer10kRmb").value = wechatAdj.toFixed(4);
+        }
+
+        ["zJpyPer10kRmb","vJpyPer10kRmb"].forEach(id=>{
+          const el = $(id);
+          if(el) el.dispatchEvent(new Event("input", { bubbles:true }));
+        });
+
+        updateFxHints();
+        updateFxStatus();
+      }catch(err){
+        console.warn("Auto rate refresh failed:", err);
+        updateFxHints();
+        updateFxStatus();
+      }
+    }
+
+    async function loadAvatar(){
+      const img = document.getElementById('avatarImg');
+      const fb = document.getElementById('avatarFallback');
+
+      const candidates = [
+        "avatar.png","avatar.jpg","avatar.jpeg","avatar.webp",
+        "profile.png","profile.jpg","profile.jpeg",
+        "icon.png","icon.jpg","icon.jpeg",
+        "head.png","head.jpg","me.png","me.jpg"
+      ];
+
+      function tryOne(src){
+        return new Promise((resolve)=>{
+          const t = new Image();
+          t.onload = ()=> resolve(src);
+          t.onerror = ()=> resolve(null);
+          t.src = src + "?v=" + Date.now();
+        });
+      }
+
+      for(const c of candidates){
+        const ok = await tryOne("./" + c);
+        if(ok){
+          img.src = ok;
+          img.style.display = "block";
+          fb.style.display = "none";
+          return;
+        }
+      }
+    }
+
+    // Init
+    migrateItems();
+    syncSettingsToUI();
+    setTaxFreeToggle("NO");
+    applyFxMode();
+    render();
+    loadAvatar();
+
+    refreshAutoRates();
+    setInterval(refreshAutoRates, 5 * 60 * 1000);
+  </script>
+</body>
+</html>
