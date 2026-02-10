@@ -15,6 +15,9 @@
       --btn1:#2b3a75; --btn2:#1e2a55;
       --shadow: 0 10px 30px rgba(0,0,0,.28);
       --radius: 16px;
+
+      --red:#ff3b3b;
+      --green:#1fd074;
     }
     *{ box-sizing:border-box; }
     body{
@@ -115,7 +118,7 @@
       border: 1px solid var(--line);
       background: rgba(255,255,255,.03);
     }
-    table{ border-collapse: collapse; width:100%; font-size: 13px; min-width: 1050px; }
+    table{ border-collapse: collapse; width:100%; font-size: 13px; min-width: 1150px; }
     th,td{
       border: 1px solid rgba(255,255,255,.08);
       padding: 8px 10px;
@@ -154,27 +157,37 @@
     .toggle button{
       flex:1;
       padding:10px 10px;
-      font-weight:800;
+      font-weight:900;
       font-size:13px;
-      color:var(--muted);
+      color: rgba(255,255,255,.80);
       background: transparent;
       border:0;
       cursor:pointer;
     }
-    .toggle button.active{
-      color: var(--text);
-      background: rgba(255,255,255,.08);
-    }
     .toggle.small button{
       padding:6px 10px;
       font-size:12px;
+    }
+    /* active colors */
+    .toggle button[data-v="NO"].active{
+      background: var(--red);
+      color: #fff;
+    }
+    .toggle button[data-v="YES"].active{
+      background: var(--green);
+      color: #fff;
+    }
+    /* inactive look */
+    .toggle button:not(.active){
+      color: rgba(233,236,255,.55);
+      background: rgba(255,255,255,.03);
     }
 
     @media (max-width: 720px){
       .field{ grid-column: span 12; }
       .field.small, .field.tiny{ grid-column: span 12; }
       .kpi{ grid-column: span 12; }
-      table{ min-width: 980px; }
+      table{ min-width: 1080px; }
     }
   </style>
 </head>
@@ -220,16 +233,14 @@
           <div class="label">USDT/CNY（买取）</div>
           <input class="input" id="usdtCny" type="number" step="0.0001" />
         </div>
+
+        <!-- 同一列：提U磨损 + T/C磨损 + USDC/CNY -->
         <div class="field small">
-          <div class="label">除数 1（默认 0.9986）</div>
+          <div class="label">提U磨损</div>
           <input class="input" id="usdtDiv1" type="number" step="0.0001" />
-        </div>
-        <div class="field small">
-          <div class="label">除数 2（默认 0.9945）</div>
+          <div class="label" style="margin-top:6px;">T/C磨损</div>
           <input class="input" id="usdtDiv2" type="number" step="0.0001" />
-        </div>
-        <div class="field small">
-          <div class="label">USDC/CNY（自动 = USDT/CNY / 除数1 / 除数2）</div>
+          <div class="label" style="margin-top:6px;">USDC/CNY（自动）</div>
           <input class="input" id="usdcCny" type="number" step="0.0001" disabled />
         </div>
 
@@ -247,7 +258,7 @@
         </div>
       </div>
       <div class="hint" style="margin-top:10px;">
-        折扣幅度按百分比输入：95 表示 95%。免税 YES 时按 <code>/ (1 + 税率%)</code> 去税。Cashback 输入 3 表示 3%。
+        优惠幅度按“减免比例”输入：填 15 表示优惠 15%（等价于支付 85%）。免税 YES 时按 <code>/ (1 + 税率%)</code> 去税。Cashback 输入 3 表示 3%。
       </div>
     </div>
 
@@ -258,10 +269,17 @@
           <div class="label">平台（自由输入）</div>
           <input class="input" id="platform" placeholder="例如 Ready / VX / ZFB / Master…" />
         </div>
+
+        <div class="field tiny">
+          <div class="label">商品分类</div>
+          <input class="input" id="category" placeholder="例如 耳机 / 线材 / 配件…" />
+        </div>
+
         <div class="field">
           <div class="label">商品名</div>
           <input class="input" id="name" placeholder="例如 耳机 / 配件…" />
         </div>
+
         <div class="field small">
           <div class="label">JPY（单价）</div>
           <input class="input" id="jpy" type="number" step="1" placeholder="例如 98000" />
@@ -271,8 +289,8 @@
           <input class="input" id="qty" type="number" step="1" placeholder="1" />
         </div>
         <div class="field tiny">
-          <div class="label">折扣幅度（%）</div>
-          <input class="input" id="discountPct" type="number" step="0.01" placeholder="例如 95" />
+          <div class="label">优惠幅度（%）</div>
+          <input class="input" id="promoOffPct" type="number" step="0.01" placeholder="例如 15" />
         </div>
 
         <div class="field tiny">
@@ -290,7 +308,7 @@
         <input id="excelFile" type="file" accept=".xlsx,.xls" style="display:none;" />
       </div>
       <div class="hint" style="margin-top:10px;">
-        Excel 导入：读取第 1 个 Sheet。折扣列如果是 0.95 或 95 都能识别；Cashback/税率同理（0.03 或 3）。
+        Excel 导入：读取第 1 个 Sheet。若折扣列是“0.85 / 85（表示支付85%）”，会自动转换成“优惠15%”。若你 Excel 里已经是“优惠幅度”，则直接按 15 读取。
       </div>
     </div>
 
@@ -307,10 +325,11 @@
           <tr>
             <th>#</th>
             <th>平台</th>
+            <th>商品分类</th>
             <th>商品名</th>
             <th>JPY</th>
             <th>数量</th>
-            <th>折扣%</th>
+            <th>优惠%</th>
             <th>免税</th>
             <th>最优价格</th>
             <th>最优解</th>
@@ -334,7 +353,7 @@
   <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <script>
-    const KEY = "ready_v1_state_v2_percent_inputs_toggle_taxfree";
+    const KEY = "ready_v1_state_v3_category_promoOff_toggle_colors";
 
     const defaultState = () => ({
       settings: {
@@ -343,8 +362,8 @@
         zJpyPer10kRmb: 444.65,
         vJpyPer10kRmb: 443.86,
         usdtCny: 6.97,
-        usdtDiv1: 0.9986,
-        usdtDiv2: 0.9945,
+        usdtDiv1: 0.9986, // 提U磨损
+        usdtDiv2: 0.9945, // T/C磨损
         cashbackPct: 3,
         taxRatePct: 10,
         sellJpyPer10kRmb: 500
@@ -374,19 +393,39 @@
     const esc = (s)=> String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
     const fmt = (x)=> Number.isFinite(x) ? x.toFixed(2) : "";
 
-    function calcUsdcCny(s){
-      const div1 = n(s.usdtDiv1, 0.9986);
-      const div2 = n(s.usdtDiv2, 0.9945);
-      return n(s.usdtCny,0) / div1 / div2;
-    }
+    function clamp(x, lo, hi){ return Math.min(hi, Math.max(lo, x)); }
 
-    // 兼容：输入可能是 0.95 或 95 -> 转为百分比 95
+    // 通用：输入可能是 0.95 或 95 -> 转为“百分比值”
     function toPct(v, defaultPct){
       const x = n(v, NaN);
       if(!Number.isFinite(x)) return defaultPct;
       if(x <= 0) return defaultPct;
       if(x <= 1.5) return x * 100;
       return x;
+    }
+
+    // 将“支付比例(%)”或“支付系数”转换成“优惠%”
+    // 例：0.85 -> 优惠15；85 -> 优惠15
+    function payToOffPct(v, defaultOff=0){
+      const payPct = toPct(v, 100);
+      const off = 100 - payPct;
+      return clamp(off, 0, 100);
+    }
+
+    // 将“优惠%”规范化
+    function toOffPct(v, defaultOff=0){
+      const x = n(v, NaN);
+      if(!Number.isFinite(x)) return defaultOff;
+      if(x < 0) return 0;
+      // 若用户误填 0.15 也兼容：认为是 15%
+      if(x <= 1.5) return clamp(x * 100, 0, 100);
+      return clamp(x, 0, 100);
+    }
+
+    function calcUsdcCny(s){
+      const div1 = n(s.usdtDiv1, 0.9986);
+      const div2 = n(s.usdtDiv2, 0.9945);
+      return n(s.usdtCny,0) / div1 / div2;
     }
 
     function setTaxFreeToggle(v){
@@ -410,24 +449,26 @@
     function calcRow(it, s){
       const jpy = n(it.jpy, 0);
       const qty = Math.max(1, n(it.qty, 1));
-      const discountPct = toPct(it.discountPct, 100);
-      const discFactor = discountPct / 100;
+
+      const offPct = toOffPct(it.promoOffPct, 0);
+      const payFactor = 1 - (offPct / 100);
 
       const taxFree = String(it.taxFree||"NO").toUpperCase() === "YES";
       const taxRatePct = toPct(s.taxRatePct, 10);
       const taxDivisor = 1 + (taxRatePct / 100);
 
-      const jpyDiscount = jpy * discFactor * qty;
+      const jpyDiscount = jpy * payFactor * qty;
       const jpyTax = taxFree ? (jpyDiscount / taxDivisor) : jpyDiscount;
 
+      // Ready
       const usdcCny = calcUsdcCny(s);
       const usdcM = jpyTax * (n(s.mJpyPer10kUsdc,0) / 10000);
       const rmbU = usdcM * usdcCny;
-
       const cashbackPct = toPct(s.cashbackPct, 3);
       const cashback = rmbU * (cashbackPct / 100);
       const ready = rmbU - cashback;
 
+      // VX/ZFB/Master
       const vx = jpyTax * (n(s.vJpyPer10kRmb,0) / 10000);
       const zfb = jpyTax * (n(s.zJpyPer10kRmb,0) / 10000);
       const master = jpyTax * (n(s.mJpyPer10kRmb,0) / 10000);
@@ -482,14 +523,37 @@
     ["mJpyPer10kUsdc","mJpyPer10kRmb","zJpyPer10kRmb","vJpyPer10kRmb","usdtCny","usdtDiv1","usdtDiv2","cashbackPct","taxRatePct","sellJpyPer10kRmb"]
       .forEach(id => $(id).addEventListener("input", syncUIToSettings));
 
+    // 迁移：旧版可能存 discountPct（支付百分比），转换为 promoOffPct（优惠百分比）
+    function migrateItems(){
+      for(const it of state.items){
+        // 若已有 promoOffPct 就不动
+        if(it.promoOffPct == null){
+          if(it.discountPct != null){
+            it.promoOffPct = payToOffPct(it.discountPct, 0);
+            delete it.discountPct;
+          }else if(it.discountFactor != null){
+            it.promoOffPct = payToOffPct(it.discountFactor, 0);
+            delete it.discountFactor;
+          }else{
+            it.promoOffPct = 0;
+          }
+        }else{
+          it.promoOffPct = toOffPct(it.promoOffPct, 0);
+        }
+        if(it.category == null) it.category = "";
+      }
+      saveState();
+    }
+
     function addItem(){
       const it = {
         id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random(),
         platform: ($("platform").value || "").trim(),
+        category: ($("category").value || "").trim(),
         name: ($("name").value || "").trim() || "(未命名)",
         jpy: n($("jpy").value, 0),
         qty: Math.max(1, n($("qty").value, 1)),
-        discountPct: toPct($("discountPct").value, 100),
+        promoOffPct: toOffPct($("promoOffPct").value, 0),
         taxFree: getTaxFreeFromToggle()
       };
       state.items.unshift(it);
@@ -519,12 +583,14 @@
             settings: { ...defaultState().settings, ...(s.settings||{}) },
             items: Array.isArray(s.items) ? s.items : []
           };
+          // 兼容旧版 settings
           if("cashbackRate" in (s.settings||{})) state.settings.cashbackPct = toPct(s.settings.cashbackRate, 3);
           if("taxDivisor" in (s.settings||{})){
             const div = n(s.settings.taxDivisor, 1.1);
             state.settings.taxRatePct = Math.max(0, (div - 1) * 100);
           }
           saveState();
+          migrateItems();
           syncSettingsToUI();
           render();
         }catch(e){
@@ -566,15 +632,30 @@
           return "";
         };
 
-        const imported = rows.map(r => ({
-          id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random(),
-          platform: String(pick(r, ["平台","platform","Platform"])).trim(),
-          name: String(pick(r, ["商品名","商品","name","Name"])).trim() || "(未命名)",
-          jpy: n(pick(r, ["JPY","jpy","单价","价格"]), 0),
-          qty: Math.max(1, n(pick(r, ["数量","qty","Qty"]), 1)),
-          discountPct: toPct(pick(r, ["折扣幅度","折扣","discountPct","DiscountPct","discountFactor","DiscountFactor"]), 100),
-          taxFree: String(pick(r, ["是否免税","免税","taxFree","TaxFree"])).toUpperCase()==="YES" ? "YES" : "NO"
-        })).filter(x => x.jpy || x.name);
+        const imported = rows.map(r => {
+          const rawDisc = pick(r, ["优惠幅度","优惠%","promoOffPct","PromoOffPct", "折扣幅度","折扣","discountPct","DiscountPct","discountFactor","DiscountFactor"]);
+          // 规则：如果列名是“优惠幅度”，按优惠%读；如果是旧的“折扣幅度”，把支付比例转成优惠%
+          let offPct = 0;
+          const hasPromoHeader =
+            ("优惠幅度" in r) || ("优惠%" in r) || ("promoOffPct" in r) || ("PromoOffPct" in r);
+          if(hasPromoHeader){
+            offPct = toOffPct(rawDisc, 0);
+          }else{
+            // 旧表：折扣幅度是支付比例
+            offPct = payToOffPct(rawDisc, 0);
+          }
+
+          return ({
+            id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random(),
+            platform: String(pick(r, ["平台","platform","Platform"])).trim(),
+            category: String(pick(r, ["商品分类","分类","category","Category"])).trim(),
+            name: String(pick(r, ["商品名","商品","name","Name"])).trim() || "(未命名)",
+            jpy: n(pick(r, ["JPY","jpy","单价","价格"]), 0),
+            qty: Math.max(1, n(pick(r, ["数量","qty","Qty"]), 1)),
+            promoOffPct: offPct,
+            taxFree: String(pick(r, ["是否免税","免税","taxFree","TaxFree"])).toUpperCase()==="YES" ? "YES" : "NO"
+          });
+        }).filter(x => x.jpy || x.name);
 
         state.items = imported.concat(state.items);
         saveState();
@@ -628,10 +709,11 @@
           <tr data-id="${esc(it.id)}">
             <td>${idx+1}</td>
             <td contenteditable="true" data-k="platform"><span class="pill">${esc(it.platform||"")}</span></td>
+            <td contenteditable="true" data-k="category">${esc(it.category||"")}</td>
             <td contenteditable="true" data-k="name">${esc(it.name)}</td>
             <td contenteditable="true" data-k="jpy">${esc(it.jpy)}</td>
             <td contenteditable="true" data-k="qty">${esc(it.qty)}</td>
-            <td contenteditable="true" data-k="discountPct">${esc(toPct(it.discountPct,100))}</td>
+            <td contenteditable="true" data-k="promoOffPct">${esc(toOffPct(it.promoOffPct,0))}</td>
 
             <td>
               <div class="toggle small" data-k="taxFreeToggleRow">
@@ -664,7 +746,7 @@
         });
       });
 
-      // 行内免税 toggle（事件委托）
+      // 行内免税 toggle
       tb.querySelectorAll('[data-k="taxFreeToggleRow"]').forEach(box=>{
         box.addEventListener('click', (e)=>{
           const btn = e.target.closest('button[data-v]');
@@ -697,8 +779,8 @@
           if(k === "jpy" || k === "qty"){
             it[k] = n(val, 0);
             if(k === "qty") it[k] = Math.max(1, it[k]);
-          }else if(k === "discountPct"){
-            it.discountPct = toPct(val, 100);
+          }else if(k === "promoOffPct"){
+            it.promoOffPct = toOffPct(val, 0);
           }else{
             it[k] = val;
           }
@@ -716,6 +798,7 @@
     }
 
     // init
+    migrateItems();
     syncSettingsToUI();
     setTaxFreeToggle("NO");
     render();
