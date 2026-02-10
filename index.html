@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>Ready 助手 · by Copper Nickel</title>
+<title>Ready 助手</title>
 
 <style>
 :root{
-  --bg:#0b1020;--bg2:#070a14;
+  --bg:#0b1020; --bg2:#070a14;
   --card:rgba(18,26,51,.92);
-  --text:#e8ecff;--muted:#a9b2d6;
+  --text:#e8ecff; --muted:#a9b2d6;
   --line:rgba(255,255,255,.10);
-  --ok:#1fd074;--bad:#ff3b3b;
+  --ok:#1fd074; --warn:#ffd27a; --bad:#ff3b3b;
   --radius:16px;
 }
 *{box-sizing:border-box}
@@ -21,49 +21,57 @@ body{
   background:linear-gradient(180deg,var(--bg),var(--bg2));
   color:var(--text);
 }
-.container{max-width:1080px;margin:0 auto;padding:12px}
+.container{max-width:1080px;margin:0 auto;padding:14px}
 
-/* ===== Top Bar ===== */
+/* ===== Topbar ===== */
 .topbar{
-  position:sticky;top:0;z-index:20;
+  position:sticky;top:0;z-index:10;
   background:rgba(11,16,32,.8);
   backdrop-filter:blur(10px);
   border-bottom:1px solid var(--line);
 }
 .topbar-inner{
   max-width:1080px;margin:0 auto;
-  padding:10px 12px;
-  display:flex;justify-content:space-between;align-items:center;
+  padding:12px 14px;
+  display:flex;align-items:center;justify-content:space-between;
 }
-.author{display:flex;align-items:center;gap:10px}
+.author{
+  display:flex;align-items:center;gap:10px;
+}
 .avatar{
   width:34px;height:34px;border-radius:50%;
   border:1px solid rgba(255,255,255,.2);
   object-fit:cover;
 }
-.brand .title{font-weight:900;font-size:15px}
-.brand .subtitle{font-size:12px;color:var(--muted)}
+.brand .title{
+  font-weight:900;font-size:16px;
+}
+.brand .subtitle{
+  font-size:12px;color:var(--muted);
+}
 
 /* ===== Card ===== */
 .card{
   background:var(--card);
   border:1px solid var(--line);
   border-radius:var(--radius);
-  padding:12px;
-  margin-top:12px;
+  padding:14px;
+  margin-top:14px;
 }
-.card h3{margin:0 0 6px;font-size:14px}
+.card h3{margin:0 0 8px;font-size:14px}
 
-/* ===== Compact Grid ===== */
+/* ===== Grid ===== */
 .grid{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:8px;
+  grid-template-columns:repeat(12,1fr);
+  gap:10px;
 }
+.field{grid-column:span 4;display:flex;flex-direction:column;gap:6px}
+.field.wide{grid-column:span 6}
 .label{font-size:12px;color:var(--muted)}
 .input{
   width:100%;
-  padding:8px 10px;
+  padding:9px 10px;
   border-radius:12px;
   border:1px solid var(--line);
   background:rgba(255,255,255,.06);
@@ -71,23 +79,26 @@ body{
 }
 
 /* ===== Toggle ===== */
-.toggle{display:flex;border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+.toggle{display:flex;border:1px solid var(--line);border-radius:12px;overflow:hidden}
 .toggle button{
-  flex:1;border:0;padding:6px 0;font-weight:900;color:#fff;
-  background:#444;cursor:pointer;
+  flex:1;border:0;padding:6px 0;font-weight:900;color:#fff;cursor:pointer;
 }
-.toggle .yes.active{background:var(--ok)}
 .toggle .no.active{background:var(--bad)}
-.toggle button:not(.active){opacity:.4}
+.toggle .yes.active{background:var(--ok)}
+.toggle button:not(.active){opacity:.35;background:#444}
 
 /* ===== Table ===== */
-.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:14px;margin-top:8px}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:14px}
 table{border-collapse:collapse;width:100%;min-width:1100px;font-size:13px}
 th,td{border:1px solid rgba(255,255,255,.08);padding:8px}
-th{position:sticky;top:0;background:#121a33;color:var(--muted)}
+th{background:#121a33;color:var(--muted);position:sticky;top:0}
 td[contenteditable]{background:rgba(255,255,255,.05)}
 .min-ok{color:var(--ok);font-weight:900}
 .min-bad{color:var(--bad);font-weight:900}
+
+@media (max-width:720px){
+  .field{grid-column:span 12}
+}
 </style>
 </head>
 
@@ -112,26 +123,23 @@ td[contenteditable]{background:rgba(255,255,255,.05)}
 <div class="card">
 <h3>汇率 / 参数（对齐 Excel V1）</h3>
 <div class="grid">
-  <div><div class="label">M JPY/U</div><input id="mju" class="input" value="63.9"></div>
-  <div><div class="label">M JPY/R</div><input id="mjr" class="input" value="443.49"></div>
-  <div><div class="label">Z JPY/R</div><input id="zjr" class="input" value="444.65"></div>
-  <div><div class="label">V JPY/R</div><input id="vjr" class="input" value="443.86"></div>
+  <div class="field"><div class="label">M JPY/U</div><input class="input" id="mju" value="63.9"></div>
+  <div class="field"><div class="label">M JPY/R</div><input class="input" id="mjr" value="443.49"></div>
+  <div class="field"><div class="label">Z JPY/R</div><input class="input" id="zjr" value="444.65"></div>
+  <div class="field"><div class="label">V JPY/R</div><input class="input" id="vjr" value="443.86"></div>
 
-  <div><div class="label">USDT/CNY（买取）</div><input id="usdt" class="input" value="6.97"></div>
+  <div class="field"><div class="label">USDT/CNY（买取）</div><input class="input" id="usdt" value="6.97"></div>
+  <div class="field"><div class="label">提U磨损</div><input class="input" id="loss1" value="0.9986"></div>
+  <div class="field"><div class="label">T/C磨损</div><input class="input" id="loss2" value="0.9945"></div>
+  <div class="field"><div class="label">USDC/CNY（自动）</div><input class="input" id="usdc" disabled></div>
 
-  <div>
-    <div class="label">提U磨损</div><input id="loss1" class="input" value="0.9986">
-    <div class="label">T/C磨损</div><input id="loss2" class="input" value="0.9945">
-    <div class="label">USDC/CNY（自动）</div><input id="usdc" class="input" disabled>
-  </div>
-
-  <div><div class="label">Cashback %</div><input id="cash" class="input" value="3"></div>
-  <div><div class="label">税率 %</div><input id="tax" class="input" value="10"></div>
-  <div><div class="label">SELL JPY/R</div><input id="sell" class="input" value="500"></div>
+  <div class="field"><div class="label">Cashback %</div><input class="input" id="cash" value="3"></div>
+  <div class="field"><div class="label">税率 %</div><input class="input" id="tax" value="10"></div>
+  <div class="field"><div class="label">SELL JPY/R</div><input class="input" id="sell" value="500"></div>
 </div>
 </div>
 
-<!-- ===== Items ===== -->
+<!-- ===== Table ===== -->
 <div class="card">
 <h3>商品列表</h3>
 <div class="table-wrap">
@@ -155,22 +163,20 @@ const tb=document.getElementById("tb");
 let items=[{p:"Ready",c:"耳机",n:"示例商品",j:100000,q:1,o:15,t:"NO"}];
 
 function calc(){
-  const usdc = document.getElementById("usdt").value /
-               document.getElementById("loss1").value /
-               document.getElementById("loss2").value;
-  document.getElementById("usdc").value=usdc.toFixed(6);
+  const usdc = usdt.value / loss1.value / loss2.value;
+  usdc.value = usdc.toFixed(6);
 
   tb.innerHTML="";
   items.forEach((it,i)=>{
     const pay=(1-it.o/100)*it.j*it.q;
-    const base=it.t==="YES"?pay/(1+document.getElementById("tax").value/100):pay;
-    const ready=base*(document.getElementById("mju").value/10000)*usdc*(1-document.getElementById("cash").value/100);
-    const vx=base*(document.getElementById("vjr").value/10000);
-    const zfb=base*(document.getElementById("zjr").value/10000);
-    const master=base*(document.getElementById("mjr").value/10000);
+    const base=it.t==="YES"?pay/(1+tax.value/100):pay;
+    const ready=base*(mju.value/10000)*usdc*(1-cash.value/100);
+    const vx=base*(vjr.value/10000);
+    const zfb=base*(zjr.value/10000);
+    const master=base*(mjr.value/10000);
     const min=Math.min(ready,vx,zfb,master);
     const label=min===ready?"Ready":min===vx?"VX":min===zfb?"ZFB":"Master";
-    const profit=it.j*(document.getElementById("sell").value/10000)-min;
+    const profit=it.j*(sell.value/10000)-min;
 
     tb.insertAdjacentHTML("beforeend",`
     <tr>
