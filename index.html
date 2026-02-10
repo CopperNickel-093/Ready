@@ -73,7 +73,7 @@
     .field.small{ grid-column: span 4; }
     .field.tiny{ grid-column: span 3; }
     .label{ font-size: 12px; color: var(--muted); }
-    .input, .select{
+    .input{
       width:100%;
       border: 1px solid var(--line);
       background: rgba(255,255,255,.06);
@@ -115,7 +115,7 @@
       border: 1px solid var(--line);
       background: rgba(255,255,255,.03);
     }
-    table{ border-collapse: collapse; width:100%; font-size: 13px; min-width: 1300px; }
+    table{ border-collapse: collapse; width:100%; font-size: 13px; min-width: 1050px; }
     th,td{
       border: 1px solid rgba(255,255,255,.08);
       padding: 8px 10px;
@@ -142,11 +142,39 @@
     .min-ok{ color: var(--ok); font-weight: 900; }
     .min-warn{ color: var(--warn); font-weight: 900; }
     .min-bad{ color: var(--bad); font-weight: 900; }
+
+    /* Segmented toggle */
+    .toggle{
+      display:flex;
+      border:1px solid var(--line);
+      border-radius:12px;
+      overflow:hidden;
+      background: rgba(255,255,255,.04);
+    }
+    .toggle button{
+      flex:1;
+      padding:10px 10px;
+      font-weight:800;
+      font-size:13px;
+      color:var(--muted);
+      background: transparent;
+      border:0;
+      cursor:pointer;
+    }
+    .toggle button.active{
+      color: var(--text);
+      background: rgba(255,255,255,.08);
+    }
+    .toggle.small button{
+      padding:6px 10px;
+      font-size:12px;
+    }
+
     @media (max-width: 720px){
       .field{ grid-column: span 12; }
       .field.small, .field.tiny{ grid-column: span 12; }
       .kpi{ grid-column: span 12; }
-      table{ min-width: 1100px; }
+      table{ min-width: 980px; }
     }
   </style>
 </head>
@@ -187,21 +215,31 @@
           <div class="label">V JPY/R（每 10000 JPY = ? RMB）</div>
           <input class="input" id="vJpyPer10kRmb" type="number" step="0.0001" />
         </div>
+
         <div class="field small">
-          <div class="label">USDT/CNY（C9）</div>
+          <div class="label">USDT/CNY（买取）</div>
           <input class="input" id="usdtCny" type="number" step="0.0001" />
         </div>
         <div class="field small">
-          <div class="label">USDC/CNY（自动 = USDT/CNY /0.9986/0.9945）</div>
+          <div class="label">除数 1（默认 0.9986）</div>
+          <input class="input" id="usdtDiv1" type="number" step="0.0001" />
+        </div>
+        <div class="field small">
+          <div class="label">除数 2（默认 0.9945）</div>
+          <input class="input" id="usdtDiv2" type="number" step="0.0001" />
+        </div>
+        <div class="field small">
+          <div class="label">USDC/CNY（自动 = USDT/CNY / 除数1 / 除数2）</div>
           <input class="input" id="usdcCny" type="number" step="0.0001" disabled />
         </div>
+
         <div class="field small">
-          <div class="label">Cashback（Ready，比例）</div>
-          <input class="input" id="cashbackRate" type="number" step="0.0001" />
+          <div class="label">Cashback（%）</div>
+          <input class="input" id="cashbackPct" type="number" step="0.01" />
         </div>
         <div class="field small">
-          <div class="label">免税除数（默认 1.1）</div>
-          <input class="input" id="taxDivisor" type="number" step="0.0001" />
+          <div class="label">税率（%）</div>
+          <input class="input" id="taxRatePct" type="number" step="0.01" />
         </div>
         <div class="field small">
           <div class="label">SELL JPY/R（每 10000 JPY = ? RMB）</div>
@@ -209,7 +247,7 @@
         </div>
       </div>
       <div class="hint" style="margin-top:10px;">
-        折扣幅度请按 Excel：例如 0.85（不是 85%）。免税 YES 时按 <code>/ 1.1</code>（默认）。
+        折扣幅度按百分比输入：95 表示 95%。免税 YES 时按 <code>/ (1 + 税率%)</code> 去税。Cashback 输入 3 表示 3%。
       </div>
     </div>
 
@@ -217,14 +255,8 @@
       <h3>添加商品</h3>
       <div class="grid">
         <div class="field small">
-          <div class="label">平台（仅记录；最优解按四平台自动比较）</div>
-          <select class="select" id="platform">
-            <option value="">（可空）</option>
-            <option value="Ready">Ready</option>
-            <option value="VX">VX</option>
-            <option value="ZFB">ZFB</option>
-            <option value="Master">Master</option>
-          </select>
+          <div class="label">平台（自由输入）</div>
+          <input class="input" id="platform" placeholder="例如 Ready / VX / ZFB / Master…" />
         </div>
         <div class="field">
           <div class="label">商品名</div>
@@ -239,24 +271,26 @@
           <input class="input" id="qty" type="number" step="1" placeholder="1" />
         </div>
         <div class="field tiny">
-          <div class="label">折扣幅度（系数）</div>
-          <input class="input" id="discountFactor" type="number" step="0.0001" placeholder="例如 0.85" />
+          <div class="label">折扣幅度（%）</div>
+          <input class="input" id="discountPct" type="number" step="0.01" placeholder="例如 95" />
         </div>
+
         <div class="field tiny">
           <div class="label">是否免税</div>
-          <select class="select" id="taxFree">
-            <option value="NO" selected>NO</option>
-            <option value="YES">YES</option>
-          </select>
+          <div class="toggle" id="taxFreeToggle">
+            <button type="button" data-v="NO" class="active">NO</button>
+            <button type="button" data-v="YES">YES</button>
+          </div>
         </div>
       </div>
+
       <div class="row" style="margin-top:12px;">
         <button class="btn" id="btnAdd">添加</button>
         <button class="btn ghost" id="btnImportExcel">从 Excel 导入</button>
         <input id="excelFile" type="file" accept=".xlsx,.xls" style="display:none;" />
       </div>
       <div class="hint" style="margin-top:10px;">
-        Excel 导入：读取第 1 个 Sheet。若表头包含：<code>平台</code> <code>商品名</code> <code>JPY</code> <code>数量</code> <code>折扣幅度</code> <code>是否免税</code>，会自动映射。
+        Excel 导入：读取第 1 个 Sheet。折扣列如果是 0.95 或 95 都能识别；Cashback/税率同理（0.03 或 3）。
       </div>
     </div>
 
@@ -276,14 +310,8 @@
             <th>商品名</th>
             <th>JPY</th>
             <th>数量</th>
-            <th>折扣幅度</th>
+            <th>折扣%</th>
             <th>免税</th>
-            <th>JPY/折扣</th>
-            <th>JPY/免税</th>
-            <th>Total/Ready</th>
-            <th>RMB/VX</th>
-            <th>RMB/ZFB</th>
-            <th>RMB/Master</th>
             <th>最优价格</th>
             <th>最优解</th>
             <th>RMB/SELL</th>
@@ -303,23 +331,23 @@
 
   </div>
 
-  <!-- SheetJS：稳定版本 -->
   <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <script>
-    const KEY = "ready_v1_state_v1";
+    const KEY = "ready_v1_state_v2_percent_inputs_toggle_taxfree";
 
     const defaultState = () => ({
       settings: {
-        // Excel V1 默认值
-        mJpyPer10kUsdc: 63.9,     // C2
-        mJpyPer10kRmb: 443.49,    // C3
-        zJpyPer10kRmb: 444.65,    // C4
-        vJpyPer10kRmb: 443.86,    // C5
-        usdtCny: 6.97,            // C9
-        cashbackRate: 0.03,       // P = O*0.03
-        taxDivisor: 1.1,          // /1.1
-        sellJpyPer10kRmb: 500     // C8
+        mJpyPer10kUsdc: 63.9,
+        mJpyPer10kRmb: 443.49,
+        zJpyPer10kRmb: 444.65,
+        vJpyPer10kRmb: 443.86,
+        usdtCny: 6.97,
+        usdtDiv1: 0.9986,
+        usdtDiv2: 0.9945,
+        cashbackPct: 3,
+        taxRatePct: 10,
+        sellJpyPer10kRmb: 500
       },
       items: []
     });
@@ -339,7 +367,6 @@
     }
 
     let state = loadState();
-
     function saveState(){ localStorage.setItem(KEY, JSON.stringify(state)); }
 
     const $ = (id) => document.getElementById(id);
@@ -348,36 +375,63 @@
     const fmt = (x)=> Number.isFinite(x) ? x.toFixed(2) : "";
 
     function calcUsdcCny(s){
-      // Excel: =C9/0.9986/0.9945
-      return n(s.usdtCny,0) / 0.9986 / 0.9945;
+      const div1 = n(s.usdtDiv1, 0.9986);
+      const div2 = n(s.usdtDiv2, 0.9945);
+      return n(s.usdtCny,0) / div1 / div2;
     }
+
+    // 兼容：输入可能是 0.95 或 95 -> 转为百分比 95
+    function toPct(v, defaultPct){
+      const x = n(v, NaN);
+      if(!Number.isFinite(x)) return defaultPct;
+      if(x <= 0) return defaultPct;
+      if(x <= 1.5) return x * 100;
+      return x;
+    }
+
+    function setTaxFreeToggle(v){
+      const val = String(v||'NO').toUpperCase()==='YES' ? 'YES' : 'NO';
+      document.querySelectorAll('#taxFreeToggle button').forEach(b=>{
+        b.classList.toggle('active', b.getAttribute('data-v') === val);
+      });
+    }
+
+    function getTaxFreeFromToggle(){
+      const el = document.querySelector('#taxFreeToggle button.active');
+      return el ? el.getAttribute('data-v') : 'NO';
+    }
+
+    document.getElementById('taxFreeToggle').addEventListener('click', (e)=>{
+      const btn = e.target.closest('button[data-v]');
+      if(!btn) return;
+      setTaxFreeToggle(btn.getAttribute('data-v'));
+    });
 
     function calcRow(it, s){
       const jpy = n(it.jpy, 0);
       const qty = Math.max(1, n(it.qty, 1));
-      const disc = n(it.discountFactor, 1);     // Excel: 0.85
+      const discountPct = toPct(it.discountPct, 100);
+      const discFactor = discountPct / 100;
+
       const taxFree = String(it.taxFree||"NO").toUpperCase() === "YES";
+      const taxRatePct = toPct(s.taxRatePct, 10);
+      const taxDivisor = 1 + (taxRatePct / 100);
 
-      // L: JPY/折扣
-      const jpyDiscount = jpy * disc * qty;
+      const jpyDiscount = jpy * discFactor * qty;
+      const jpyTax = taxFree ? (jpyDiscount / taxDivisor) : jpyDiscount;
 
-      // M: JPY/免税
-      const taxDiv = Math.max(1e-9, n(s.taxDivisor, 1.1));
-      const jpyTax = taxFree ? (jpyDiscount / taxDiv) : jpyDiscount;
-
-      // Ready: N= M * (C2/10000), O= N * USDC/CNY, P=O*0.03, Q=O-P
       const usdcCny = calcUsdcCny(s);
       const usdcM = jpyTax * (n(s.mJpyPer10kUsdc,0) / 10000);
       const rmbU = usdcM * usdcCny;
-      const cashback = rmbU * n(s.cashbackRate,0);
+
+      const cashbackPct = toPct(s.cashbackPct, 3);
+      const cashback = rmbU * (cashbackPct / 100);
       const ready = rmbU - cashback;
 
-      // VX/ZFB/Master
       const vx = jpyTax * (n(s.vJpyPer10kRmb,0) / 10000);
       const zfb = jpyTax * (n(s.zJpyPer10kRmb,0) / 10000);
       const master = jpyTax * (n(s.mJpyPer10kRmb,0) / 10000);
 
-      // 最优价格 & 最优解（并列优先级 Ready->VX->ZFB->Master）
       const min = Math.min(ready, vx, zfb, master);
       let minLabel = "Master";
       if (ready === min) minLabel = "Ready";
@@ -385,16 +439,11 @@
       else if (zfb === min) minLabel = "ZFB";
       else minLabel = "Master";
 
-      // SELL: W = 原价 JPY * SELL rate * qty（不吃折扣/免税）
       const sell = jpy * (n(s.sellJpyPer10kRmb,0) / 10000) * qty;
-
-      // PROFIT: X = W - V(min)
       const profit = sell - min;
-
-      // 原价/Master: Y = 原价 JPY * master rate * qty（不吃折扣/免税）
       const originMaster = jpy * (n(s.mJpyPer10kRmb,0) / 10000) * qty;
 
-      return { jpyDiscount, jpyTax, ready, vx, zfb, master, min, minLabel, sell, profit, originMaster, usdcCny };
+      return { min, minLabel, sell, profit, originMaster };
     }
 
     function syncSettingsToUI(){
@@ -404,8 +453,10 @@
       $("zJpyPer10kRmb").value  = s.zJpyPer10kRmb;
       $("vJpyPer10kRmb").value  = s.vJpyPer10kRmb;
       $("usdtCny").value        = s.usdtCny;
-      $("cashbackRate").value   = s.cashbackRate;
-      $("taxDivisor").value     = s.taxDivisor;
+      $("usdtDiv1").value       = s.usdtDiv1;
+      $("usdtDiv2").value       = s.usdtDiv2;
+      $("cashbackPct").value    = s.cashbackPct;
+      $("taxRatePct").value     = s.taxRatePct;
       $("sellJpyPer10kRmb").value = s.sellJpyPer10kRmb;
       $("usdcCny").value = calcUsdcCny(s).toFixed(6);
     }
@@ -417,8 +468,10 @@
       s.zJpyPer10kRmb  = n($("zJpyPer10kRmb").value, 0);
       s.vJpyPer10kRmb  = n($("vJpyPer10kRmb").value, 0);
       s.usdtCny        = n($("usdtCny").value, 0);
-      s.cashbackRate   = n($("cashbackRate").value, 0);
-      s.taxDivisor     = n($("taxDivisor").value, 1.1);
+      s.usdtDiv1       = n($("usdtDiv1").value, 0.9986);
+      s.usdtDiv2       = n($("usdtDiv2").value, 0.9945);
+      s.cashbackPct    = n($("cashbackPct").value, 0);
+      s.taxRatePct     = n($("taxRatePct").value, 0);
       s.sellJpyPer10kRmb = n($("sellJpyPer10kRmb").value, 0);
 
       $("usdcCny").value = calcUsdcCny(s).toFixed(6);
@@ -426,18 +479,18 @@
       render();
     }
 
-    ["mJpyPer10kUsdc","mJpyPer10kRmb","zJpyPer10kRmb","vJpyPer10kRmb","usdtCny","cashbackRate","taxDivisor","sellJpyPer10kRmb"]
+    ["mJpyPer10kUsdc","mJpyPer10kRmb","zJpyPer10kRmb","vJpyPer10kRmb","usdtCny","usdtDiv1","usdtDiv2","cashbackPct","taxRatePct","sellJpyPer10kRmb"]
       .forEach(id => $(id).addEventListener("input", syncUIToSettings));
 
     function addItem(){
       const it = {
         id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random(),
-        platform: $("platform").value.trim(),
+        platform: ($("platform").value || "").trim(),
         name: ($("name").value || "").trim() || "(未命名)",
         jpy: n($("jpy").value, 0),
         qty: Math.max(1, n($("qty").value, 1)),
-        discountFactor: n($("discountFactor").value, 1),
-        taxFree: $("taxFree").value
+        discountPct: toPct($("discountPct").value, 100),
+        taxFree: getTaxFreeFromToggle()
       };
       state.items.unshift(it);
       saveState();
@@ -445,7 +498,6 @@
     }
     $("btnAdd").addEventListener("click", addItem);
 
-    // Export / Import / Reset
     $("btnExport").addEventListener("click", ()=>{
       const blob = new Blob([JSON.stringify(state, null, 2)], {type:"application/json"});
       const url = URL.createObjectURL(blob);
@@ -467,6 +519,11 @@
             settings: { ...defaultState().settings, ...(s.settings||{}) },
             items: Array.isArray(s.items) ? s.items : []
           };
+          if("cashbackRate" in (s.settings||{})) state.settings.cashbackPct = toPct(s.settings.cashbackRate, 3);
+          if("taxDivisor" in (s.settings||{})){
+            const div = n(s.settings.taxDivisor, 1.1);
+            state.settings.taxRatePct = Math.max(0, (div - 1) * 100);
+          }
           saveState();
           syncSettingsToUI();
           render();
@@ -482,10 +539,10 @@
       state = defaultState();
       saveState();
       syncSettingsToUI();
+      setTaxFreeToggle("NO");
       render();
     });
 
-    // Excel Import
     $("btnImportExcel").addEventListener("click", ()=>{
       if(typeof XLSX === "undefined"){
         alert("XLSX 库未加载，无法导入。");
@@ -515,7 +572,7 @@
           name: String(pick(r, ["商品名","商品","name","Name"])).trim() || "(未命名)",
           jpy: n(pick(r, ["JPY","jpy","单价","价格"]), 0),
           qty: Math.max(1, n(pick(r, ["数量","qty","Qty"]), 1)),
-          discountFactor: n(pick(r, ["折扣幅度","折扣","discountFactor","DiscountFactor"]), 1),
+          discountPct: toPct(pick(r, ["折扣幅度","折扣","discountPct","DiscountPct","discountFactor","DiscountFactor"]), 100),
           taxFree: String(pick(r, ["是否免税","免税","taxFree","TaxFree"])).toUpperCase()==="YES" ? "YES" : "NO"
         })).filter(x => x.jpy || x.name);
 
@@ -530,14 +587,10 @@
 
     function renderKpis(){
       const s = state.settings;
-      let sumReady=0,sumVX=0,sumZFB=0,sumMaster=0,sumMin=0,sumSell=0,sumProfit=0,sumOriginMaster=0;
+      let sumMin=0,sumSell=0,sumProfit=0,sumOriginMaster=0;
 
       for(const it of state.items){
         const c = calcRow(it, s);
-        sumReady += c.ready;
-        sumVX += c.vx;
-        sumZFB += c.zfb;
-        sumMaster += c.master;
         sumMin += c.min;
         sumSell += c.sell;
         sumProfit += c.profit;
@@ -546,10 +599,6 @@
 
       const kpis = [
         {k:"合计（最优价格）", v: fmt(sumMin)},
-        {k:"合计（Ready）", v: fmt(sumReady)},
-        {k:"合计（VX）", v: fmt(sumVX)},
-        {k:"合计（ZFB）", v: fmt(sumZFB)},
-        {k:"合计（Master）", v: fmt(sumMaster)},
         {k:"合计（SELL）", v: fmt(sumSell)},
         {k:"合计（PROFIT）", v: fmt(sumProfit)},
         {k:"合计（原价/Master）", v: fmt(sumOriginMaster)}
@@ -582,16 +631,14 @@
             <td contenteditable="true" data-k="name">${esc(it.name)}</td>
             <td contenteditable="true" data-k="jpy">${esc(it.jpy)}</td>
             <td contenteditable="true" data-k="qty">${esc(it.qty)}</td>
-            <td contenteditable="true" data-k="discountFactor">${esc(it.discountFactor)}</td>
-            <td contenteditable="true" data-k="taxFree">${esc(it.taxFree)}</td>
+            <td contenteditable="true" data-k="discountPct">${esc(toPct(it.discountPct,100))}</td>
 
-            <td>${fmt(c.jpyDiscount)}</td>
-            <td>${fmt(c.jpyTax)}</td>
-
-            <td>${fmt(c.ready)}</td>
-            <td>${fmt(c.vx)}</td>
-            <td>${fmt(c.zfb)}</td>
-            <td>${fmt(c.master)}</td>
+            <td>
+              <div class="toggle small" data-k="taxFreeToggleRow">
+                <button type="button" data-v="NO" class="${String(it.taxFree).toUpperCase()==='YES' ? '' : 'active'}">NO</button>
+                <button type="button" data-v="YES" class="${String(it.taxFree).toUpperCase()==='YES' ? 'active' : ''}">YES</button>
+              </div>
+            </td>
 
             <td class="${minClass}">${fmt(c.min)}</td>
             <td class="${minClass}">${esc(c.minLabel)}</td>
@@ -617,7 +664,25 @@
         });
       });
 
-      // 行内编辑
+      // 行内免税 toggle（事件委托）
+      tb.querySelectorAll('[data-k="taxFreeToggleRow"]').forEach(box=>{
+        box.addEventListener('click', (e)=>{
+          const btn = e.target.closest('button[data-v]');
+          if(!btn) return;
+          const tr = e.target.closest('tr');
+          const id = tr?.getAttribute('data-id');
+          if(!id) return;
+
+          const it = state.items.find(x=>x.id === id);
+          if(!it) return;
+
+          it.taxFree = btn.getAttribute('data-v'); // 'YES' or 'NO'
+          saveState();
+          render();
+        });
+      });
+
+      // 行内编辑（不包含免税）
       tb.querySelectorAll('[contenteditable="true"]').forEach(cell=>{
         cell.addEventListener("blur", (e)=>{
           const td = e.target;
@@ -629,11 +694,11 @@
           const it = state.items.find(x=>x.id === id);
           if(!it) return;
 
-          if(k === "jpy" || k === "qty" || k === "discountFactor"){
-            it[k] = n(val, k==="discountFactor" ? 1 : 0);
+          if(k === "jpy" || k === "qty"){
+            it[k] = n(val, 0);
             if(k === "qty") it[k] = Math.max(1, it[k]);
-          }else if(k === "taxFree"){
-            it.taxFree = String(val).toUpperCase()==="YES" ? "YES" : "NO";
+          }else if(k === "discountPct"){
+            it.discountPct = toPct(val, 100);
           }else{
             it[k] = val;
           }
@@ -645,12 +710,14 @@
     }
 
     function render(){
+      $("usdcCny").value = calcUsdcCny(state.settings).toFixed(6);
       renderKpis();
       renderTable();
     }
 
     // init
     syncSettingsToUI();
+    setTaxFreeToggle("NO");
     render();
   </script>
 </body>
