@@ -252,7 +252,7 @@
       text-overflow: ellipsis;
     }
 
-    /* ===== FX Area redesign (no element removed) ===== */
+    /* ===== FX Area redesign ===== */
     .fx-area{
       margin-top: 10px;
       display: grid;
@@ -402,12 +402,12 @@
 
       <div class="fx-area">
 
-        <!-- ① Mastercard -->
+        <!-- ① Mastercard + 扣减参数 合并 -->
         <div class="fx-box">
           <div class="fx-title">
             <div>
               <b>Mastercard</b>
-              <div class="fx-sub">卡组织相关输入</div>
+              <!-- 删除中文副标题：不显示“卡组织相关输入/按百分比输入” -->
             </div>
           </div>
 
@@ -426,6 +426,18 @@
               <div class="fx-label">SELL JPY/R（每 10000 JPY = ? RMB）</div>
               <input class="input" id="sellJpyPer10kRmb" type="number" step="0.0001" />
             </div>
+
+            <div class="fx-dual">
+              <div class="fx-row">
+                <div class="fx-label">Cashback（%）</div>
+                <input class="input" id="cashbackPct" type="number" step="0.01" />
+              </div>
+
+              <div class="fx-row">
+                <div class="fx-label">税率（%）</div>
+                <input class="input" id="taxRatePct" type="number" step="0.01" />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -434,7 +446,7 @@
           <div class="fx-title">
             <div>
               <b>渠道汇率</b>
-              <div class="fx-sub">可手动 / 可抓取（Auto ON/OFF）</div>
+              <div class="fx-sub">可手动 / 可抓取</div>
             </div>
 
             <div class="fx-status-wrap">
@@ -450,7 +462,7 @@
           <div class="fx-form">
             <div class="fx-row">
               <div class="fx-label">
-                <span>Alipay JPY/R（每 10000 JPY = ? RMB）</span>
+                <span>Alipay JPY/R</span>
                 <span class="fx-tools">
                   <span class="fxmode" data-fx="alipay">
                     <button type="button" class="manual active">手动</button>
@@ -464,7 +476,7 @@
 
             <div class="fx-row">
               <div class="fx-label">
-                <span>Wechat JPY/R（每 10000 JPY = ? RMB）</span>
+                <span>Wechat JPY/R</span>
                 <span class="fx-tools">
                   <span class="fxmode" data-fx="wechat">
                     <button type="button" class="manual active">手动</button>
@@ -476,7 +488,8 @@
               <input class="input" id="vJpyPer10kRmb" type="number" step="0.0001" />
             </div>
 
-            <div class="fx-dual">
+            <!-- 抓取系数区：不启动抓取时隐藏 -->
+            <div class="fx-dual" id="fxAutoPctBox" style="display:none;">
               <div class="fx-row">
                 <div class="fx-label">Alipay 抓取系数（%）</div>
                 <input class="input" id="alipayAutoPct" type="number" step="0.01" />
@@ -493,7 +506,7 @@
         <div class="fx-box">
           <div class="fx-title">
             <div>
-              <b>USDT / USDC 区</b>
+              <b>USDT / USDC</b>
               <div class="fx-sub">USDC/CNY 自动计算</div>
             </div>
           </div>
@@ -518,28 +531,6 @@
             <div class="fx-row">
               <div class="fx-label">USDC/CNY（自动）</div>
               <input class="input" id="usdcCny" type="number" step="0.0001" disabled />
-            </div>
-          </div>
-        </div>
-
-        <!-- ④ cashback/tax -->
-        <div class="fx-box">
-          <div class="fx-title">
-            <div>
-              <b>扣减参数</b>
-              <div class="fx-sub">按百分比输入</div>
-            </div>
-          </div>
-
-          <div class="fx-form">
-            <div class="fx-row">
-              <div class="fx-label">Cashback（%）</div>
-              <input class="input" id="cashbackPct" type="number" step="0.01" />
-            </div>
-
-            <div class="fx-row">
-              <div class="fx-label">税率（%）</div>
-              <input class="input" id="taxRatePct" type="number" step="0.01" />
             </div>
           </div>
         </div>
@@ -646,7 +637,7 @@
   <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <script>
-    const KEY = "ready_v1_state_final_fx_auto_pct_v2";
+    const KEY = "ready_v1_state_final_fx_auto_pct_v3";
     const FXMODE_KEY = "fx_mode_v2"; // {alipay:"manual|auto", wechat:"manual|auto"}
 
     const defaultState = () => ({
@@ -662,7 +653,7 @@
         taxRatePct: 10,
         sellJpyPer10kRmb: 500,
 
-        // 方案1：抓取价微调系数（%）
+        // 抓取价微调系数（%）
         alipayAutoPct: 100.04,
         wechatAutoPct: 97.73
       },
@@ -744,7 +735,13 @@
       setTaxFreeToggle(btn.getAttribute('data-v'));
     });
 
-    // FX Mode
+    function updateFxAutoPctVisibility(){
+      const box = $("fxAutoPctBox");
+      if(!box) return;
+      const anyAuto = ((fxMode.alipay || "manual") === "auto") || ((fxMode.wechat || "manual") === "auto");
+      box.style.display = anyAuto ? "" : "none";
+    }
+
     function updateFxStatus(){
       const a = (fxMode.alipay || "manual") === "auto";
       const w = (fxMode.wechat || "manual") === "auto";
@@ -764,6 +761,7 @@
         wBox.classList.toggle("off", !w);
         wText.textContent = `Wechat: ${w ? "ON" : "OFF"}`;
       }
+      updateFxAutoPctVisibility();
     }
 
     function setFxMode(which, mode){
@@ -909,6 +907,7 @@
       saveState();
       render();
       updateFxHints();
+      updateFxStatus();
 
       if((fxMode.alipay||"manual")==="auto" || (fxMode.wechat||"manual")==="auto"){
         refreshAutoRates();
@@ -1279,6 +1278,7 @@
     syncSettingsToUI();
     setTaxFreeToggle("NO");
     applyFxMode();
+    updateFxAutoPctVisibility();
     render();
     loadAvatar();
 
