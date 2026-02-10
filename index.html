@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>Ready 助手</title>
+<title>Ready 助手 · by Copper Nickel</title>
 
 <style>
 :root{
@@ -11,7 +11,7 @@
   --card:rgba(18,26,51,.92);
   --text:#e8ecff; --muted:#a9b2d6;
   --line:rgba(255,255,255,.10);
-  --ok:#1fd074; --warn:#ffd27a; --bad:#ff3b3b;
+  --ok:#1fd074; --bad:#ff3b3b;
   --radius:16px;
 }
 *{box-sizing:border-box}
@@ -33,22 +33,16 @@ body{
 .topbar-inner{
   max-width:1080px;margin:0 auto;
   padding:12px 14px;
-  display:flex;align-items:center;justify-content:space-between;
+  display:flex;align-items:center;
 }
-.author{
-  display:flex;align-items:center;gap:10px;
-}
+.author{display:flex;align-items:center;gap:10px}
 .avatar{
   width:34px;height:34px;border-radius:50%;
   border:1px solid rgba(255,255,255,.2);
   object-fit:cover;
 }
-.brand .title{
-  font-weight:900;font-size:16px;
-}
-.brand .subtitle{
-  font-size:12px;color:var(--muted);
-}
+.brand .title{font-weight:900;font-size:16px}
+.brand .subtitle{font-size:12px;color:var(--muted)}
 
 /* ===== Card ===== */
 .card{
@@ -67,7 +61,6 @@ body{
   gap:10px;
 }
 .field{grid-column:span 4;display:flex;flex-direction:column;gap:6px}
-.field.wide{grid-column:span 6}
 .label{font-size:12px;color:var(--muted)}
 .input{
   width:100%;
@@ -121,7 +114,7 @@ td[contenteditable]{background:rgba(255,255,255,.05)}
 
 <!-- ===== Settings ===== -->
 <div class="card">
-<h3>汇率 / 参数（对齐 Excel V1）</h3>
+<h3>汇率 / 参数（V1）</h3>
 <div class="grid">
   <div class="field"><div class="label">M JPY/U</div><input class="input" id="mju" value="63.9"></div>
   <div class="field"><div class="label">M JPY/R</div><input class="input" id="mjr" value="443.49"></div>
@@ -159,46 +152,66 @@ td[contenteditable]{background:rgba(255,255,255,.05)}
 </div>
 
 <script>
-const tb=document.getElementById("tb");
-let items=[{p:"Ready",c:"耳机",n:"示例商品",j:100000,q:1,o:15,t:"NO"}];
+const tb = document.getElementById("tb");
+
+let items = [
+  { p:"Ready", c:"耳机", n:"示例商品", j:100000, q:1, o:15, t:"NO" }
+];
 
 function calc(){
-  const usdc = usdt.value / loss1.value / loss2.value;
-  usdc.value = usdc.toFixed(6);
+  const usdtV = Number(usdt.value) || 0;
+  const loss1V = Number(loss1.value) || 1;
+  const loss2V = Number(loss2.value) || 1;
 
-  tb.innerHTML="";
+  const usdcRate = usdtV / loss1V / loss2V;
+  document.getElementById("usdc").value = usdcRate.toFixed(6);
+
+  const mjuV = Number(mju.value)||0;
+  const mjrV = Number(mjr.value)||0;
+  const zjrV = Number(zjr.value)||0;
+  const vjrV = Number(vjr.value)||0;
+  const cashV = (Number(cash.value)||0)/100;
+  const taxV  = (Number(tax.value)||0)/100;
+  const sellV = Number(sell.value)||0;
+
+  tb.innerHTML = "";
+
   items.forEach((it,i)=>{
-    const pay=(1-it.o/100)*it.j*it.q;
-    const base=it.t==="YES"?pay/(1+tax.value/100):pay;
-    const ready=base*(mju.value/10000)*usdc*(1-cash.value/100);
-    const vx=base*(vjr.value/10000);
-    const zfb=base*(zjr.value/10000);
-    const master=base*(mjr.value/10000);
-    const min=Math.min(ready,vx,zfb,master);
-    const label=min===ready?"Ready":min===vx?"VX":min===zfb?"ZFB":"Master";
-    const profit=it.j*(sell.value/10000)-min;
+    const pay  = (1 - (Number(it.o)||0)/100) * (Number(it.j)||0) * (Number(it.q)||1);
+    const base = it.t==="YES" ? pay/(1+taxV) : pay;
+
+    const ready  = base*(mjuV/10000)*usdcRate*(1-cashV);
+    const vx     = base*(vjrV/10000);
+    const zfb    = base*(zjrV/10000);
+    const master = base*(mjrV/10000);
+
+    const min = Math.min(ready,vx,zfb,master);
+    const label = min===ready?"Ready":min===vx?"VX":min===zfb?"ZFB":"Master";
+    const profit = (Number(it.j)||0)*(sellV/10000)-min;
 
     tb.insertAdjacentHTML("beforeend",`
-    <tr>
-      <td>${i+1}</td>
-      <td contenteditable>${it.p}</td>
-      <td contenteditable>${it.c}</td>
-      <td contenteditable>${it.n}</td>
-      <td contenteditable>${it.j}</td>
-      <td contenteditable>${it.q}</td>
-      <td contenteditable>${it.o}</td>
-      <td>
-        <div class="toggle">
-          <button class="no ${it.t==="NO"?"active":""}" onclick="it.t='NO';calc()">NO</button>
-          <button class="yes ${it.t==="YES"?"active":""}" onclick="it.t='YES';calc()">YES</button>
-        </div>
-      </td>
-      <td class="min-ok">${min.toFixed(2)}</td>
-      <td>${label}</td>
-      <td class="${profit>=0?"min-ok":"min-bad"}">${profit.toFixed(2)}</td>
-    </tr>`);
+      <tr>
+        <td>${i+1}</td>
+        <td contenteditable>${it.p}</td>
+        <td contenteditable>${it.c}</td>
+        <td contenteditable>${it.n}</td>
+        <td contenteditable>${it.j}</td>
+        <td contenteditable>${it.q}</td>
+        <td contenteditable>${it.o}</td>
+        <td>
+          <div class="toggle">
+            <button class="no ${it.t==="NO"?"active":""}" onclick="it.t='NO';calc()">NO</button>
+            <button class="yes ${it.t==="YES"?"active":""}" onclick="it.t='YES';calc()">YES</button>
+          </div>
+        </td>
+        <td class="min-ok">${min.toFixed(2)}</td>
+        <td>${label}</td>
+        <td class="${profit>=0?"min-ok":"min-bad"}">${profit.toFixed(2)}</td>
+      </tr>
+    `);
   });
 }
+
 calc();
 </script>
 
