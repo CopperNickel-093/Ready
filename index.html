@@ -266,19 +266,19 @@
       <h3>汇率 / 参数（对齐 Excel V1）</h3>
       <div class="grid">
         <div class="field small">
-          <div class="label">M JPY/U（每 10000 JPY = ? USDC）</div>
+          <div class="label">Mastercard JPY/U（每 10000 JPY = ? USDC）</div>
           <input class="input" id="mJpyPer10kUsdc" type="number" step="0.0001" />
         </div>
         <div class="field small">
-          <div class="label">M JPY/R（每 10000 JPY = ? RMB）</div>
+          <div class="label">Mastercard JPY/R（每 10000 JPY = ? RMB）</div>
           <input class="input" id="mJpyPer10kRmb" type="number" step="0.0001" />
         </div>
         <div class="field small">
-          <div class="label">Z JPY/R（每 10000 JPY = ? RMB）</div>
+          <div class="label">Alipay JPY/R（每 10000 JPY = ? RMB）</div>
           <input class="input" id="zJpyPer10kRmb" type="number" step="0.0001" />
         </div>
         <div class="field small">
-          <div class="label">V JPY/R（每 10000 JPY = ? RMB）</div>
+          <div class="label">Wechat JPY/R（每 10000 JPY = ? RMB）</div>
           <input class="input" id="vJpyPer10kRmb" type="number" step="0.0001" />
         </div>
 
@@ -406,7 +406,7 @@
   <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <script>
-    const KEY = "ready_v1_state_v4_author_avatar_category_promoOff";
+    const KEY = "ready_v1_state_v4_author_avatar_category_promoOff_mastercard_alipay_wechat";
 
     const defaultState = () => ({
       settings: {
@@ -470,6 +470,7 @@
       const x = n(v, NaN);
       if(!Number.isFinite(x)) return defaultOff;
       if(x < 0) return 0;
+      // 若用户误填 0.15 也兼容：认为是 15%
       if(x <= 1.5) return clamp(x * 100, 0, 100);
       return clamp(x, 0, 100);
     }
@@ -486,10 +487,12 @@
         b.classList.toggle('active', b.getAttribute('data-v') === val);
       });
     }
+
     function getTaxFreeFromToggle(){
       const el = document.querySelector('#taxFreeToggle button.active');
       return el ? el.getAttribute('data-v') : 'NO';
     }
+
     document.getElementById('taxFreeToggle').addEventListener('click', (e)=>{
       const btn = e.target.closest('button[data-v]');
       if(!btn) return;
@@ -852,7 +855,6 @@
       const img = document.getElementById('avatarImg');
       const fb = document.getElementById('avatarFallback');
 
-      // 推荐：你可以直接把头像命名为 avatar.png 放根目录
       const candidates = [
         "avatar.png","avatar.jpg","avatar.jpeg","avatar.webp",
         "profile.png","profile.jpg","profile.jpeg",
@@ -865,8 +867,7 @@
           const t = new Image();
           t.onload = ()=> resolve(src);
           t.onerror = ()=> resolve(null);
-          // cache-bust to avoid GH Pages cache surprises
-          t.src = src + "?v=" + Date.now();
+          t.src = src + "?v=" + Date.now(); // cache-bust
         });
       }
 
