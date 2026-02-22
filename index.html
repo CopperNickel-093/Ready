@@ -120,6 +120,7 @@
       font-size: 14px;
     }
     .input::placeholder{ color: rgba(233,236,255,.35); }
+    .input[disabled]{ opacity: .72; }
 
     .hr{ height:1px; background: var(--line); margin: 12px 0; }
 
@@ -478,7 +479,7 @@
 
             <div class="fx-row">
               <div class="fx-label">
-                <span>Wechat JPY/R</span>
+                <span>Wechat JPY/R（VX）</span>
                 <span class="fx-tools">
                   <span class="fxmode" data-fx="wechat">
                     <button type="button" class="manual active">手动</button>
@@ -488,6 +489,12 @@
                 </span>
               </div>
               <input class="input" id="vJpyPer10kRmb" type="number" step="0.0001" />
+            </div>
+
+            <!-- ✅ 平衡点（USDT/CNY 买取） -->
+            <div class="fx-row">
+              <div class="fx-label">平衡点（Ready = VX 时 USDT/CNY 买取）</div>
+              <input class="input" id="breakevenUsdtCny" type="text" disabled />
             </div>
 
             <!-- 抓取系数区：不启动抓取时隐藏 -->
@@ -501,6 +508,10 @@
                 <input class="input" id="wechatAutoPct" type="number" step="0.01" />
               </div>
             </div>
+          </div>
+
+          <div class="hint" style="margin-top:10px;">
+            平衡点计算使用：Mastercard JPY/U、Wechat JPY/R（VX）、cashback/R、提U磨损、T/C磨损。与具体商品无关。
           </div>
         </div>
 
@@ -641,7 +652,7 @@
   <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <script>
-    const KEY = "ready_v1_state_final_fx_auto_pct_v5";
+    const KEY = "ready_v1_state_final_fx_auto_pct_v6_breakeven";
     const FXMODE_KEY = "fx_mode_v2"; // {alipay:"manual|auto", wechat:"manual|auto"}
 
     const defaultState = () => ({
@@ -723,6 +734,28 @@
       const div1 = n(s.usdtDiv1, 0.9986);
       const div2 = n(s.usdtDiv2, 0.9945);
       return n(s.usdtCny,0) / div1 / div2;
+    }
+
+    // ✅ 平衡点：Ready = VX 时 USDT/CNY（买取）
+    // Ready = (mJpyPer10kUsdc/10000)*USDC/CNY*(1-cashback)  * JPY
+    // VX    = (vJpyPer10kRmb/10000)                         * JPY
+    // => USDC/CNY* = vJpyPer10kRmb / (mJpyPer10kUsdc*(1-cb))
+    // => USDT/CNY* = USDC/CNY* * div1 * div2
+    function calcBreakEvenUsdtCny(s){
+      const mU = n(s.mJpyPer10kUsdc, NaN);
+      const vR = n(s.vJpyPer10kRmb, NaN);
+      const cb = toPct(s.cashbackPct, 0) / 100;
+      const div1 = n(s.usdtDiv1, NaN);
+      const div2 = n(s.usdtDiv2, NaN);
+
+      if(!Number.isFinite(mU) || !Number.isFinite(vR) || !Number.isFinite(div1) || !Number.isFinite(div2)) return NaN;
+      if(mU <= 0) return NaN;
+      if(cb >= 1) return NaN; // cashback>=100% 无意义
+      if(div1 <= 0 || div2 <= 0) return NaN;
+
+      const usdcCnyStar = vR / (mU * (1 - cb));
+      const usdtCnyStar = usdcCnyStar * div1 * div2;
+      return usdtCnyStar;
     }
 
     // Add item tax toggle
@@ -861,10 +894,10 @@
       const vx = jpyTax * (n(s.vJpyPer10kRmb,0) / 10000);
       const zfb = jpyTax * (n(s.zJpyPer10kRmb,0) / 10000);
 
-      // Master（原有：不带 cashback）
+      // Master（不带 cashback）
       const master = jpyTax * (n(s.mJpyPer10kRmb,0) / 10000);
 
-      // Master/原生（新增：直接用 Mastercard JPY/R，带 cashback/原生）
+      // Master/原生（带 cashback/原生）
       const cashbackNativePct = toPct(s.cashbackNativePct, 0);
       const cashbackNative = master * (cashbackNativePct / 100);
       const masterNative = master - cashbackNative;
@@ -906,6 +939,10 @@
       $("wechatAutoPct").value = (s.wechatAutoPct ?? 97.73);
 
       $("usdcCny").value = calcUsdcCny(s).toFixed(6);
+
+      // ✅ 平衡点显示
+      const be = calcBreakEvenUsdtCny(s);
+      $("breakevenUsdtCny").value = Number.isFinite(be) ? be.toFixed(6) : "—";
     }
 
     function syncUIToSettings(){
@@ -928,6 +965,10 @@
       s.wechatAutoPct  = n($("wechatAutoPct").value, 97.73);
 
       $("usdcCny").value = calcUsdcCny(s).toFixed(6);
+
+      // ✅ 平衡点实时刷新
+      const be = calcBreakEvenUsdtCny(s);
+      $("breakevenUsdtCny").value = Number.isFinite(be) ? be.toFixed(6) : "—";
 
       saveState();
       render();
@@ -1214,6 +1255,11 @@
 
     function render(){
       $("usdcCny").value = calcUsdcCny(state.settings).toFixed(6);
+
+      // ✅ 平衡点随 render() 刷新（防止别处变更没触发 input）
+      const be = calcBreakEvenUsdtCny(state.settings);
+      $("breakevenUsdtCny").value = Number.isFinite(be) ? be.toFixed(6) : "—";
+
       renderKpis();
       renderTable();
       updateFxHints();
