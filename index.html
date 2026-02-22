@@ -44,7 +44,6 @@
       flex-wrap: wrap;
     }
 
-    /* Author block */
     .author{ display:flex; align-items:center; gap:10px; min-width: 220px; }
     .avatar{
       width: 34px; height: 34px; border-radius: 50%;
@@ -156,7 +155,7 @@
       border: 1px solid var(--line);
       background: rgba(255,255,255,.03);
     }
-    table{ border-collapse: collapse; width:100%; font-size: 13px; min-width: 1280px; }
+    table{ border-collapse: collapse; width:100%; font-size: 13px; min-width: 1400px; }
     th,td{
       border: 1px solid rgba(255,255,255,.08);
       padding: 8px 10px;
@@ -185,7 +184,6 @@
     .min-warn{ color: var(--warn); font-weight: 900; }
     .min-bad{ color: var(--bad); font-weight: 900; }
 
-    /* Segmented toggle YES/NO */
     .toggle{
       display:flex;
       border:1px solid var(--line);
@@ -214,7 +212,6 @@
       background: rgba(255,255,255,.03);
     }
 
-    /* FX mode switch (Manual/Auto) */
     .fxmode{
       display:flex;
       border:1px solid var(--line);
@@ -253,7 +250,6 @@
       text-overflow: ellipsis;
     }
 
-    /* ===== FX Area redesign ===== */
     .fx-area{
       margin-top: 10px;
       display: grid;
@@ -289,11 +285,7 @@
       grid-template-columns: 1fr;
       gap: 10px;
     }
-    .fx-row{
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-    }
+    .fx-row{ display:flex; flex-direction:column; gap:6px; }
     .fx-label{
       font-size: 12px;
       color: var(--muted);
@@ -316,7 +308,6 @@
       gap: 10px;
     }
 
-    /* Auto ON/OFF status badges */
     .fx-status-wrap{
       display:flex;
       gap: 8px;
@@ -353,12 +344,13 @@
 
     @media (max-width: 980px){
       .fx-box{ grid-column: span 6; }
+      table{ min-width: 1400px; }
     }
     @media (max-width: 720px){
       .field{ grid-column: span 12; }
       .field.small, .field.tiny{ grid-column: span 12; }
       .kpi{ grid-column: span 12; }
-      table{ min-width: 1280px; }
+      table{ min-width: 1400px; }
 
       .fx-box{ grid-column: span 12; }
       .fx-tools{ min-width: unset; justify-content:flex-start; }
@@ -403,7 +395,7 @@
 
       <div class="fx-area">
 
-        <!-- ① Mastercard + 扣减参数（Ready 与 Master/原生） -->
+        <!-- ① Mastercard + 扣减参数 -->
         <div class="fx-box">
           <div class="fx-title">
             <div><b>Mastercard</b></div>
@@ -444,7 +436,7 @@
           </div>
         </div>
 
-        <!-- ② Channels -->
+        <!-- ② Channels + 平衡点 -->
         <div class="fx-box">
           <div class="fx-title">
             <div>
@@ -491,13 +483,33 @@
               <input class="input" id="vJpyPer10kRmb" type="number" step="0.0001" />
             </div>
 
-            <!-- ✅ 平衡点（USDT/CNY 买取） -->
             <div class="fx-row">
-              <div class="fx-label">平衡点（Ready = VX 时 USDT/CNY 买取）</div>
+              <div class="fx-label">平衡点基准（Ready = 基准）</div>
+              <select class="input" id="breakevenBase">
+                <option value="VX">VX（Wechat JPY/R）</option>
+                <option value="ZFB">ZFB（Alipay JPY/R）</option>
+                <option value="MASTER">Master（Mastercard JPY/R）</option>
+                <option value="MASTER_NATIVE">Master/原生（Mastercard JPY/R - cashback/原生）</option>
+              </select>
+            </div>
+
+            <div class="fx-row">
+              <div class="fx-label">平衡点（Ready = 基准 时 USDT/CNY 买取）</div>
               <input class="input" id="breakevenUsdtCny" type="text" disabled />
             </div>
 
-            <!-- 抓取系数区：不启动抓取时隐藏 -->
+            <!-- ✅ 新增：当前USDT 与平衡点差值 -->
+            <div class="fx-row">
+              <div class="fx-label">差值（当前 USDT 买取 - 平衡点）</div>
+              <input class="input" id="breakevenDeltaUsdt" type="text" disabled />
+            </div>
+
+            <!-- ✅ 新增：清单合计差额 -->
+            <div class="fx-row">
+              <div class="fx-label">清单合计差额（Σ Ready - Σ 基准）</div>
+              <input class="input" id="sumDiffReadyBase" type="text" disabled />
+            </div>
+
             <div class="fx-dual" id="fxAutoPctBox" style="display:none;">
               <div class="fx-row">
                 <div class="fx-label">Alipay 抓取系数（%）</div>
@@ -511,7 +523,7 @@
           </div>
 
           <div class="hint" style="margin-top:10px;">
-            平衡点计算使用：Mastercard JPY/U、Wechat JPY/R（VX）、cashback/R、提U磨损、T/C磨损。与具体商品无关。
+            “Ready-基准差额”按每个商品计算：<b>Ready 价格 - 你选择的基准渠道价格</b>（同一套折扣/免税后 JPY）。正数表示 Ready 更贵，负数表示 Ready 更便宜。
           </div>
         </div>
 
@@ -631,6 +643,10 @@
             <th>免税</th>
             <th>最优价格</th>
             <th>最优解</th>
+
+            <!-- ✅ 新增：每个商品的具体差额 -->
+            <th>Ready-基准差额</th>
+
             <th>Master/原生</th>
             <th>RMB/SELL</th>
             <th>PROFIT</th>
@@ -652,28 +668,29 @@
   <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <script>
-    const KEY = "ready_v1_state_final_fx_auto_pct_v6_breakeven";
+    const KEY = "ready_v1_state_final_fx_auto_pct_v8_breakeven_base_diff";
     const FXMODE_KEY = "fx_mode_v2"; // {alipay:"manual|auto", wechat:"manual|auto"}
 
     const defaultState = () => ({
       settings: {
         mJpyPer10kUsdc: 63.9,
         mJpyPer10kRmb: 443.49,
-        zJpyPer10kRmb: 444.65, // Alipay 手动值
-        vJpyPer10kRmb: 443.86, // Wechat 手动值
+        zJpyPer10kRmb: 444.65,
+        vJpyPer10kRmb: 443.86,
         usdtCny: 6.97,
-        usdtDiv1: 0.9986, // 提U磨损
-        usdtDiv2: 0.9945, // T/C磨损
+        usdtDiv1: 0.9986,
+        usdtDiv2: 0.9945,
 
-        cashbackPct: 3,          // cashback/R（用于 Ready）
-        cashbackNativePct: 0,    // cashback/原生（用于 Master/原生）
+        cashbackPct: 3,
+        cashbackNativePct: 0,
         taxRatePct: 10,
 
         sellJpyPer10kRmb: 500,
 
-        // 抓取价微调系数（%）
         alipayAutoPct: 100.04,
-        wechatAutoPct: 97.73
+        wechatAutoPct: 97.73,
+
+        breakevenBase: "VX" // VX | ZFB | MASTER | MASTER_NATIVE
       },
       items: []
     });
@@ -705,8 +722,6 @@
     const $ = (id) => document.getElementById(id);
     const n = (v, def=0) => { const x = Number(v); return Number.isFinite(x) ? x : def; };
     const esc = (s)=> String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
-    const fmt = (x)=> Number.isFinite(x) ? x.toFixed(2) : "";
-    const fmt4 = (x)=> Number.isFinite(x) ? x.toFixed(4) : "";
     const clamp = (x, lo, hi) => Math.min(hi, Math.max(lo, x));
 
     function toPct(v, defaultPct){
@@ -736,29 +751,63 @@
       return n(s.usdtCny,0) / div1 / div2;
     }
 
-    // ✅ 平衡点：Ready = VX 时 USDT/CNY（买取）
-    // Ready = (mJpyPer10kUsdc/10000)*USDC/CNY*(1-cashback)  * JPY
-    // VX    = (vJpyPer10kRmb/10000)                         * JPY
-    // => USDC/CNY* = vJpyPer10kRmb / (mJpyPer10kUsdc*(1-cb))
-    // => USDT/CNY* = USDC/CNY* * div1 * div2
+    // Base price (RMB) for a given item (after discount/tax), based on breakevenBase selection
+    function calcBasePrice(jpyAfterTax, s){
+      const base = String(s.breakevenBase || "VX").toUpperCase();
+      if(base === "VX"){
+        return jpyAfterTax * (n(s.vJpyPer10kRmb,0) / 10000);
+      }
+      if(base === "ZFB"){
+        return jpyAfterTax * (n(s.zJpyPer10kRmb,0) / 10000);
+      }
+      if(base === "MASTER"){
+        return jpyAfterTax * (n(s.mJpyPer10kRmb,0) / 10000);
+      }
+      if(base === "MASTER_NATIVE"){
+        const master = jpyAfterTax * (n(s.mJpyPer10kRmb,0) / 10000);
+        const cbN = toPct(s.cashbackNativePct, 0) / 100;
+        return master * (1 - cbN);
+      }
+      return jpyAfterTax * (n(s.vJpyPer10kRmb,0) / 10000);
+    }
+
+    // Break-even: Ready = Base (selected)
     function calcBreakEvenUsdtCny(s){
       const mU = n(s.mJpyPer10kUsdc, NaN);
-      const vR = n(s.vJpyPer10kRmb, NaN);
-      const cb = toPct(s.cashbackPct, 0) / 100;
+      const cbR = toPct(s.cashbackPct, 0) / 100;
       const div1 = n(s.usdtDiv1, NaN);
       const div2 = n(s.usdtDiv2, NaN);
 
-      if(!Number.isFinite(mU) || !Number.isFinite(vR) || !Number.isFinite(div1) || !Number.isFinite(div2)) return NaN;
-      if(mU <= 0) return NaN;
-      if(cb >= 1) return NaN; // cashback>=100% 无意义
-      if(div1 <= 0 || div2 <= 0) return NaN;
+      if(!Number.isFinite(mU) || mU <= 0) return NaN;
+      if(cbR >= 1) return NaN;
+      if(!Number.isFinite(div1) || !Number.isFinite(div2) || div1<=0 || div2<=0) return NaN;
 
-      const usdcCnyStar = vR / (mU * (1 - cb));
+      // base10k (RMB per 10k JPY) chosen
+      let base10k = NaN;
+      const base = String(s.breakevenBase || "VX").toUpperCase();
+
+      if(base === "VX"){
+        base10k = n(s.vJpyPer10kRmb, NaN);
+      }else if(base === "ZFB"){
+        base10k = n(s.zJpyPer10kRmb, NaN);
+      }else if(base === "MASTER"){
+        base10k = n(s.mJpyPer10kRmb, NaN);
+      }else if(base === "MASTER_NATIVE"){
+        const mR = n(s.mJpyPer10kRmb, NaN);
+        const cbN = toPct(s.cashbackNativePct, 0) / 100;
+        if(!Number.isFinite(mR) || cbN >= 1) return NaN;
+        base10k = mR * (1 - cbN);
+      }else{
+        base10k = n(s.vJpyPer10kRmb, NaN);
+      }
+
+      if(!Number.isFinite(base10k) || base10k <= 0) return NaN;
+
+      const usdcCnyStar = base10k / (mU * (1 - cbR));
       const usdtCnyStar = usdcCnyStar * div1 * div2;
       return usdtCnyStar;
     }
 
-    // Add item tax toggle
     function setTaxFreeToggle(v){
       const val = String(v||'NO').toUpperCase()==='YES' ? 'YES' : 'NO';
       document.querySelectorAll('#taxFreeToggle button').forEach(b=>{
@@ -853,7 +902,7 @@
 
       if(modeA === "auto" && Number.isFinite(aRaw)){
         alipayHint.style.display = "inline-flex";
-        alipayHint.textContent = `raw ${fmt4(aRaw)} × ${aPct.toFixed(2)}%${t}`;
+        alipayHint.textContent = `raw ${aRaw.toFixed(4)} × ${aPct.toFixed(2)}%${t}`;
       }else{
         alipayHint.style.display = "none";
         alipayHint.textContent = "";
@@ -861,7 +910,7 @@
 
       if(modeW === "auto" && Number.isFinite(wRaw)){
         wechatHint.style.display = "inline-flex";
-        wechatHint.textContent = `raw ${fmt4(wRaw)} × ${wPct.toFixed(2)}%${t}`;
+        wechatHint.textContent = `raw ${wRaw.toFixed(4)} × ${wPct.toFixed(2)}%${t}`;
       }else{
         wechatHint.style.display = "none";
         wechatHint.textContent = "";
@@ -880,29 +929,31 @@
       const taxDivisor = 1 + (taxRatePct / 100);
 
       const jpyDiscount = jpy * payFactor * qty;
-      const jpyTax = taxFree ? (jpyDiscount / taxDivisor) : jpyDiscount;
+      const jpyAfterTax = taxFree ? (jpyDiscount / taxDivisor) : jpyDiscount;
 
-      // Ready（USDC->CNY）+ cashback/R
+      // Ready (USDC->CNY) + cashback/R
       const usdcCny = calcUsdcCny(s);
-      const usdcM = jpyTax * (n(s.mJpyPer10kUsdc,0) / 10000);
+      const usdcM = jpyAfterTax * (n(s.mJpyPer10kUsdc,0) / 10000);
       const rmbU = usdcM * usdcCny;
-      const cashbackRPct = toPct(s.cashbackPct, 0);
-      const cashbackR = rmbU * (cashbackRPct / 100);
-      const ready = rmbU - cashbackR;
+      const cbR = toPct(s.cashbackPct, 0) / 100;
+      const ready = rmbU * (1 - cbR);
 
-      // 渠道
-      const vx = jpyTax * (n(s.vJpyPer10kRmb,0) / 10000);
-      const zfb = jpyTax * (n(s.zJpyPer10kRmb,0) / 10000);
+      // channels
+      const vx = jpyAfterTax * (n(s.vJpyPer10kRmb,0) / 10000);
+      const zfb = jpyAfterTax * (n(s.zJpyPer10kRmb,0) / 10000);
 
-      // Master（不带 cashback）
-      const master = jpyTax * (n(s.mJpyPer10kRmb,0) / 10000);
+      // master
+      const master = jpyAfterTax * (n(s.mJpyPer10kRmb,0) / 10000);
 
-      // Master/原生（带 cashback/原生）
-      const cashbackNativePct = toPct(s.cashbackNativePct, 0);
-      const cashbackNative = master * (cashbackNativePct / 100);
-      const masterNative = master - cashbackNative;
+      // master native
+      const cbN = toPct(s.cashbackNativePct, 0) / 100;
+      const masterNative = master * (1 - cbN);
 
-      // 最小值比较（并列优先：Ready → VX → ZFB → Master → Master/原生）
+      // base price per selection
+      const basePrice = calcBasePrice(jpyAfterTax, s);
+      const diffReadyBase = ready - basePrice;
+
+      // min selection
       const min = Math.min(ready, vx, zfb, master, masterNative);
       let minLabel = "Master/原生";
       if (ready === min) minLabel = "Ready";
@@ -913,10 +964,9 @@
 
       const sell = jpy * (n(s.sellJpyPer10kRmb,0) / 10000) * qty;
       const profit = sell - min;
-
       const originMaster = jpy * (n(s.mJpyPer10kRmb,0) / 10000) * qty;
 
-      return { ready, vx, zfb, master, masterNative, min, minLabel, sell, profit, originMaster };
+      return { ready, vx, zfb, master, masterNative, min, minLabel, sell, profit, originMaster, basePrice, diffReadyBase };
     }
 
     function syncSettingsToUI(){
@@ -938,11 +988,29 @@
       $("alipayAutoPct").value = (s.alipayAutoPct ?? 100.04);
       $("wechatAutoPct").value = (s.wechatAutoPct ?? 97.73);
 
+      $("breakevenBase").value = String(s.breakevenBase || "VX").toUpperCase();
+
       $("usdcCny").value = calcUsdcCny(s).toFixed(6);
 
-      // ✅ 平衡点显示
+      updateBreakevenOutputs();
+    }
+
+    function updateBreakevenOutputs(){
+      const s = state.settings;
       const be = calcBreakEvenUsdtCny(s);
       $("breakevenUsdtCny").value = Number.isFinite(be) ? be.toFixed(6) : "—";
+
+      const cur = n(s.usdtCny, NaN);
+      const delta = (Number.isFinite(cur) && Number.isFinite(be)) ? (cur - be) : NaN;
+      $("breakevenDeltaUsdt").value = Number.isFinite(delta) ? delta.toFixed(6) : "—";
+
+      // sum diff across items
+      let sum = 0;
+      for(const it of state.items){
+        const c = calcRow(it, s);
+        sum += (Number.isFinite(c.diffReadyBase) ? c.diffReadyBase : 0);
+      }
+      $("sumDiffReadyBase").value = Number.isFinite(sum) ? sum.toFixed(2) : "—";
     }
 
     function syncUIToSettings(){
@@ -964,11 +1032,10 @@
       s.alipayAutoPct  = n($("alipayAutoPct").value, 100.04);
       s.wechatAutoPct  = n($("wechatAutoPct").value, 97.73);
 
-      $("usdcCny").value = calcUsdcCny(s).toFixed(6);
+      s.breakevenBase = String($("breakevenBase").value || "VX").toUpperCase();
 
-      // ✅ 平衡点实时刷新
-      const be = calcBreakEvenUsdtCny(s);
-      $("breakevenUsdtCny").value = Number.isFinite(be) ? be.toFixed(6) : "—";
+      $("usdcCny").value = calcUsdcCny(s).toFixed(6);
+      updateBreakevenOutputs();
 
       saveState();
       render();
@@ -984,7 +1051,8 @@
       "mJpyPer10kUsdc","mJpyPer10kRmb","zJpyPer10kRmb","vJpyPer10kRmb",
       "usdtCny","usdtDiv1","usdtDiv2",
       "cashbackPct","cashbackNativePct","taxRatePct","sellJpyPer10kRmb",
-      "alipayAutoPct","wechatAutoPct"
+      "alipayAutoPct","wechatAutoPct",
+      "breakevenBase"
     ].forEach(id => $(id).addEventListener("input", syncUIToSettings));
 
     function migrateItems(){
@@ -1075,59 +1143,6 @@
       updateFxStatus();
     });
 
-    $("btnImportExcel").addEventListener("click", ()=>{
-      if(typeof XLSX === "undefined"){
-        alert("XLSX 库未加载，无法导入。");
-        return;
-      }
-      $("excelFile").value = "";
-      $("excelFile").click();
-    });
-
-    $("excelFile").addEventListener("change", async (e)=>{
-      const file = e.target.files && e.target.files[0];
-      if(!file) return;
-      try{
-        const buf = await file.arrayBuffer();
-        const wb = XLSX.read(buf, { type:"array" });
-        const ws = wb.Sheets[wb.SheetNames[0]];
-        const rows = XLSX.utils.sheet_to_json(ws, { defval:"" });
-
-        const pick = (r, keys) => {
-          for(const k of keys){ if(k in r) return r[k]; }
-          return "";
-        };
-
-        const imported = rows.map(r => {
-          const rawDisc = pick(r, ["优惠幅度","优惠%","promoOffPct","PromoOffPct", "折扣幅度","折扣","discountPct","DiscountPct","discountFactor","DiscountFactor"]);
-          let offPct = 0;
-
-          const hasPromoHeader =
-            ("优惠幅度" in r) || ("优惠%" in r) || ("promoOffPct" in r) || ("PromoOffPct" in r);
-
-          offPct = hasPromoHeader ? toOffPct(rawDisc, 0) : payToOffPct(rawDisc, 0);
-
-          return ({
-            id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random(),
-            platform: String(pick(r, ["平台","platform","Platform"])).trim(),
-            category: String(pick(r, ["商品分类","分类","category","Category"])).trim(),
-            name: String(pick(r, ["商品名","商品","name","Name"])).trim() || "(未命名)",
-            jpy: n(pick(r, ["JPY","jpy","单价","价格"]), 0),
-            qty: Math.max(1, n(pick(r, ["数量","qty","Qty"]), 1)),
-            promoOffPct: offPct,
-            taxFree: String(pick(r, ["是否免税","免税","taxFree","TaxFree"])).toUpperCase()==="YES" ? "YES" : "NO"
-          });
-        }).filter(x => x.jpy || x.name);
-
-        state.items = imported.concat(state.items);
-        saveState();
-        render();
-        alert(`已导入 ${imported.length} 行（第 1 个 Sheet）。`);
-      }catch(err){
-        alert("导入失败：" + (err?.message || err));
-      }
-    });
-
     function renderKpis(){
       const s = state.settings;
       let sumMin=0,sumSell=0,sumProfit=0,sumOriginMaster=0;
@@ -1141,10 +1156,10 @@
       }
 
       const kpis = [
-        {k:"合计（最优价格）", v: fmt(sumMin)},
-        {k:"合计（SELL）", v: fmt(sumSell)},
-        {k:"合计（PROFIT）", v: fmt(sumProfit)},
-        {k:"合计（原价/Master）", v: fmt(sumOriginMaster)}
+        {k:"合计（最优价格）", v: (Number.isFinite(sumMin)?sumMin.toFixed(2):"")},
+        {k:"合计（SELL）", v: (Number.isFinite(sumSell)?sumSell.toFixed(2):"")},
+        {k:"合计（PROFIT）", v: (Number.isFinite(sumProfit)?sumProfit.toFixed(2):"")},
+        {k:"合计（原价/Master）", v: (Number.isFinite(sumOriginMaster)?sumOriginMaster.toFixed(2):"")}
       ];
 
       $("kpis").innerHTML = kpis.map(x=>`
@@ -1168,6 +1183,8 @@
           c.minLabel==="ZFB" ? "min-ok" :
           c.minLabel==="Master" ? "min-bad" : "min-bad";
 
+        const diffClass = c.diffReadyBase <= 0 ? "min-ok" : "min-bad";
+
         return `
           <tr data-id="${esc(it.id)}">
             <td>${idx+1}</td>
@@ -1185,14 +1202,16 @@
               </div>
             </td>
 
-            <td class="${minClass}">${fmt(c.min)}</td>
+            <td class="${minClass}">${Number.isFinite(c.min)?c.min.toFixed(2):""}</td>
             <td class="${minClass}">${esc(c.minLabel)}</td>
 
-            <td>${fmt(c.masterNative)}</td>
+            <td class="${diffClass}">${Number.isFinite(c.diffReadyBase)?c.diffReadyBase.toFixed(2):""}</td>
 
-            <td>${fmt(c.sell)}</td>
-            <td class="${c.profit>=0 ? "min-ok":"min-bad"}">${fmt(c.profit)}</td>
-            <td>${fmt(c.originMaster)}</td>
+            <td>${Number.isFinite(c.masterNative)?c.masterNative.toFixed(2):""}</td>
+
+            <td>${Number.isFinite(c.sell)?c.sell.toFixed(2):""}</td>
+            <td class="${c.profit>=0 ? "min-ok":"min-bad"}">${Number.isFinite(c.profit)?c.profit.toFixed(2):""}</td>
+            <td>${Number.isFinite(c.originMaster)?c.originMaster.toFixed(2):""}</td>
 
             <td><button class="btn ghost" data-act="del">删除</button></td>
           </tr>
@@ -1255,11 +1274,7 @@
 
     function render(){
       $("usdcCny").value = calcUsdcCny(state.settings).toFixed(6);
-
-      // ✅ 平衡点随 render() 刷新（防止别处变更没触发 input）
-      const be = calcBreakEvenUsdtCny(state.settings);
-      $("breakevenUsdtCny").value = Number.isFinite(be) ? be.toFixed(6) : "—";
-
+      updateBreakevenOutputs();
       renderKpis();
       renderTable();
       updateFxHints();
