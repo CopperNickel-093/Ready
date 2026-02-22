@@ -121,7 +121,7 @@
     .input::placeholder{ color: rgba(233,236,255,.35); }
     .input[disabled]{ opacity: .72; }
 
-    /* ✅ 1) 平衡点基准下拉框：背景更贴近网页主色调 */
+    /* ✅ 平衡点基准下拉框：背景更贴近网页主色调 */
     select.input{
       appearance:none;
       -webkit-appearance:none;
@@ -168,7 +168,7 @@
       border: 1px solid var(--line);
       background: rgba(255,255,255,.03);
     }
-    table{ border-collapse: collapse; width:100%; font-size: 13px; min-width: 1280px; }
+    table{ border-collapse: collapse; width:100%; font-size: 13px; min-width: 1180px; }
     th,td{
       border: 1px solid rgba(255,255,255,.08);
       padding: 8px 10px;
@@ -357,13 +357,13 @@
 
     @media (max-width: 980px){
       .fx-box{ grid-column: span 6; }
-      table{ min-width: 1280px; }
+      table{ min-width: 1180px; }
     }
     @media (max-width: 720px){
       .field{ grid-column: span 12; }
       .field.small, .field.tiny{ grid-column: span 12; }
       .kpi{ grid-column: span 12; }
-      table{ min-width: 1280px; }
+      table{ min-width: 1180px; }
 
       .fx-box{ grid-column: span 12; }
       .fx-tools{ min-width: unset; justify-content:flex-start; }
@@ -528,7 +528,7 @@
           </div>
         </div>
 
-        <!-- ③ USDT/USDC（✅ 移植“差值”和“清单合计差额”到这里） -->
+        <!-- ③ USDT/USDC（差值/清单合计差额在此） -->
         <div class="fx-box">
           <div class="fx-title">
             <div>
@@ -559,7 +559,6 @@
               <input class="input" id="usdcCny" type="number" step="0.0001" disabled />
             </div>
 
-            <!-- ✅ 移植 -->
             <div class="fx-row">
               <div class="fx-label">差值（当前 USDT 买取 - 平衡点）</div>
               <input class="input" id="breakevenDeltaUsdt" type="text" disabled />
@@ -576,8 +575,7 @@
 
       <div class="hint" style="margin-top:10px;">
         优惠幅度：填 15 表示优惠 15%（等价支付 85%）。免税 YES 时按 <code>/ (1 + 税率%)</code> 去税。<br/>
-        cashback/R：用于 Ready；cashback/原生：用于 Master/原生（用于平衡点/基准时也会考虑）。<br/>
-        渠道汇率若切到 <b>抓取</b>：会用 <code>rates.json</code> 的公开参考价 × 抓取系数（%）。
+        cashback/R、cashback/原生 都是“百分号直接输入”：填 1 就是 1%（不会当 100%）。
       </div>
     </div>
 
@@ -630,7 +628,7 @@
       </div>
 
       <div class="hint" style="margin-top:10px;">
-        Excel 导入：读取第 1 个 Sheet。若折扣列是“0.85 / 85（表示支付85%）”，会自动转换成“优惠15%”。
+        Excel 导入：读取第 1 个 Sheet。折扣列若是“0.85 / 85（表示支付85%）”，会自动转成“优惠15%”。免税列可识别 YES/NO、TRUE/FALSE、1/0。
       </div>
     </div>
 
@@ -655,8 +653,6 @@
             <th>免税</th>
             <th>最优价格</th>
             <th>最优解</th>
-            <!-- ✅ 2) 删除：Ready-基准差额 -->
-            <!-- ✅ 2) 删除：Master/原生 -->
             <th>RMB/SELL</th>
             <th>PROFIT</th>
             <th>原价/Master</th>
@@ -677,7 +673,7 @@
   <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <script>
-    const KEY = "ready_v1_state_final_fx_auto_pct_v9_move_diff_remove_cols";
+    const KEY = "ready_v1_state_final_fx_auto_pct_v10_pctfix_full";
     const FXMODE_KEY = "fx_mode_v2"; // {alipay:"manual|auto", wechat:"manual|auto"}
 
     const defaultState = () => ({
@@ -690,14 +686,14 @@
         usdtDiv1: 0.9986,
         usdtDiv2: 0.9945,
 
-        cashbackPct: 3,
-        cashbackNativePct: 0,
-        taxRatePct: 10,
+        cashbackPct: 3,          // % input
+        cashbackNativePct: 0,    // % input
+        taxRatePct: 10,          // % input
 
         sellJpyPer10kRmb: 500,
 
-        alipayAutoPct: 100.04,
-        wechatAutoPct: 97.73,
+        alipayAutoPct: 100.04,   // % input
+        wechatAutoPct: 97.73,    // % input
 
         breakevenBase: "VX" // VX | ZFB | MASTER | MASTER_NATIVE
       },
@@ -733,12 +729,20 @@
     const esc = (s)=> String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
     const clamp = (x, lo, hi) => Math.min(hi, Math.max(lo, x));
 
+    // 旧逻辑保留（用于兼容历史导入/旧字段）
     function toPct(v, defaultPct){
       const x = n(v, NaN);
       if(!Number.isFinite(x)) return defaultPct;
       if(x <= 0) return defaultPct;
       if(x <= 1.5) return x * 100;
       return x;
+    }
+
+    // ✅ 百分号“直接输入”：填 1 就是 1%（不会当 100%）
+    function pct01(v, defaultPct){
+      const x = n(v, NaN);
+      const pct = Number.isFinite(x) ? x : defaultPct;
+      return clamp(pct / 100, 0, 0.999999); // 避免 100% 导致归零
     }
 
     function payToOffPct(v, defaultOff=0){
@@ -773,7 +777,7 @@
       }
       if(base === "MASTER_NATIVE"){
         const master = jpyAfterTax * (n(s.mJpyPer10kRmb,0) / 10000);
-        const cbN = toPct(s.cashbackNativePct, 0) / 100;
+        const cbN = pct01(s.cashbackNativePct, 0);
         return master * (1 - cbN);
       }
       return jpyAfterTax * (n(s.vJpyPer10kRmb,0) / 10000);
@@ -781,7 +785,7 @@
 
     function calcBreakEvenUsdtCny(s){
       const mU = n(s.mJpyPer10kUsdc, NaN);
-      const cbR = toPct(s.cashbackPct, 0) / 100;
+      const cbR = pct01(s.cashbackPct, 0);
       const div1 = n(s.usdtDiv1, NaN);
       const div2 = n(s.usdtDiv2, NaN);
 
@@ -800,7 +804,7 @@
         base10k = n(s.mJpyPer10kRmb, NaN);
       }else if(base === "MASTER_NATIVE"){
         const mR = n(s.mJpyPer10kRmb, NaN);
-        const cbN = toPct(s.cashbackNativePct, 0) / 100;
+        const cbN = pct01(s.cashbackNativePct, 0);
         if(!Number.isFinite(mR) || cbN >= 1) return NaN;
         base10k = mR * (1 - cbN);
       }else{
@@ -931,28 +935,29 @@
       const payFactor = 1 - (offPct / 100);
 
       const taxFree = String(it.taxFree||"NO").toUpperCase() === "YES";
-      const taxRatePct = toPct(s.taxRatePct, 10);
+      const taxRatePct = n(s.taxRatePct, 10);
       const taxDivisor = 1 + (taxRatePct / 100);
 
       const jpyDiscount = jpy * payFactor * qty;
       const jpyAfterTax = taxFree ? (jpyDiscount / taxDivisor) : jpyDiscount;
 
+      // Ready
       const usdcCny = calcUsdcCny(s);
       const usdcM = jpyAfterTax * (n(s.mJpyPer10kUsdc,0) / 10000);
       const rmbU = usdcM * usdcCny;
-      const cbR = toPct(s.cashbackPct, 0) / 100;
+      const cbR = pct01(s.cashbackPct, 0);
       const ready = rmbU * (1 - cbR);
 
+      // channels
       const vx = jpyAfterTax * (n(s.vJpyPer10kRmb,0) / 10000);
       const zfb = jpyAfterTax * (n(s.zJpyPer10kRmb,0) / 10000);
-      const master = jpyAfterTax * (n(s.mJpyPer10kRmb,0) / 10000);
 
-      const cbN = toPct(s.cashbackNativePct, 0) / 100;
+      // master + master native
+      const master = jpyAfterTax * (n(s.mJpyPer10kRmb,0) / 10000);
+      const cbN = pct01(s.cashbackNativePct, 0);
       const masterNative = master * (1 - cbN);
 
-      const basePrice = calcBasePrice(jpyAfterTax, s);
-      const diffReadyBase = ready - basePrice;
-
+      // min selection
       const min = Math.min(ready, vx, zfb, master, masterNative);
       let minLabel = "Master/原生";
       if (ready === min) minLabel = "Ready";
@@ -965,7 +970,11 @@
       const profit = sell - min;
       const originMaster = jpy * (n(s.mJpyPer10kRmb,0) / 10000) * qty;
 
-      return { ready, vx, zfb, master, masterNative, min, minLabel, sell, profit, originMaster, basePrice, diffReadyBase };
+      // for sumDiffReadyBase
+      const basePrice = calcBasePrice(jpyAfterTax, s);
+      const diffReadyBase = ready - basePrice;
+
+      return { ready, vx, zfb, master, masterNative, min, minLabel, sell, profit, originMaster, diffReadyBase };
     }
 
     function updateBreakevenOutputs(){
@@ -1070,13 +1079,14 @@
         }else{
           it.promoOffPct = toOffPct(it.promoOffPct, 0);
         }
+        if(!it.taxFree) it.taxFree = "NO";
       }
       saveState();
     }
 
     function addItem(){
       const it = {
-        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random(),
+        id: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random()),
         platform: ($("platform").value || "").trim(),
         category: ($("category").value || "").trim(),
         name: ($("name").value || "").trim() || "(未命名)",
@@ -1201,9 +1211,6 @@
 
             <td class="${minClass}">${Number.isFinite(c.min)?c.min.toFixed(2):""}</td>
             <td class="${minClass}">${esc(c.minLabel)}</td>
-
-            <!-- ✅ 删除：Ready-基准差额 -->
-            <!-- ✅ 删除：Master/原生 -->
 
             <td>${Number.isFinite(c.sell)?c.sell.toFixed(2):""}</td>
             <td class="${c.profit>=0 ? "min-ok":"min-bad"}">${Number.isFinite(c.profit)?c.profit.toFixed(2):""}</td>
@@ -1357,6 +1364,97 @@
         }
       }
     }
+
+    // Excel import
+    function normKey(s){
+      return String(s||"").trim().toLowerCase().replace(/\s+/g,"");
+    }
+    function truthyYes(v){
+      const s = String(v ?? "").trim().toUpperCase();
+      if(s === "YES" || s === "Y" || s === "TRUE" || s === "1") return true;
+      if(s === "NO" || s === "N" || s === "FALSE" || s === "0") return false;
+      // 中文
+      if(s === "是") return true;
+      if(s === "否") return false;
+      return false;
+    }
+    function mapRow(obj){
+      const out = {};
+      for(const k in obj) out[normKey(k)] = obj[k];
+      return out;
+    }
+    function pick(m, keys){
+      for(const k of keys){
+        const kk = normKey(k);
+        if(kk in m) return m[kk];
+      }
+      return undefined;
+    }
+
+    $("btnImportExcel").addEventListener("click", ()=> $("excelFile").click());
+    $("excelFile").addEventListener("change", async (e)=>{
+      const f = e.target.files && e.target.files[0];
+      e.target.value = "";
+      if(!f) return;
+
+      try{
+        const ab = await f.arrayBuffer();
+        const wb = XLSX.read(ab, {type:"array"});
+        const sheetName = wb.SheetNames[0];
+        if(!sheetName) throw new Error("找不到 Sheet");
+        const ws = wb.Sheets[sheetName];
+
+        const json = XLSX.utils.sheet_to_json(ws, {defval:""});
+        const items = [];
+
+        for(const raw of json){
+          const m = mapRow(raw);
+
+          const platform = String(pick(m, ["平台","platform"]) ?? "").trim();
+          const category = String(pick(m, ["商品分类","分类","category"]) ?? "").trim();
+          const name = String(pick(m, ["商品名","名称","name","title"]) ?? "").trim();
+
+          const jpy = n(pick(m, ["JPY","jpy","日元","单价","价格"]), 0);
+          const qty = Math.max(1, n(pick(m, ["数量","qty","count"]), 1));
+
+          // 折扣/优惠：支持 payFactor(0.85/85) 或 offPct(15/0.15) 两种
+          const discountLike = pick(m, ["折扣","折扣幅度","支付比例","pay","discount","discountpct","discountfactor"]);
+          const offLike = pick(m, ["优惠幅度","优惠%","off","offpct","promooffpct"]);
+
+          let promoOffPct = 0;
+          if(offLike !== undefined && offLike !== ""){
+            promoOffPct = toOffPct(offLike, 0);
+          }else if(discountLike !== undefined && discountLike !== ""){
+            promoOffPct = payToOffPct(discountLike, 0);
+          }
+
+          const taxfreeRaw = pick(m, ["免税","是否免税","taxfree","tax_free"]);
+          const taxFree = truthyYes(taxfreeRaw) ? "YES" : "NO";
+
+          if(!name && !platform && jpy === 0) continue;
+
+          items.push({
+            id: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random()),
+            platform, category,
+            name: name || "(未命名)",
+            jpy, qty,
+            promoOffPct,
+            taxFree
+          });
+        }
+
+        if(items.length === 0){
+          alert("未识别到可导入的行。请确认表头/列名。");
+          return;
+        }
+
+        state.items = items.concat(state.items);
+        saveState();
+        render();
+      }catch(err){
+        alert("Excel 导入失败：" + (err?.message || err));
+      }
+    });
 
     // Init
     migrateItems();
