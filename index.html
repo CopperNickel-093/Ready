@@ -155,7 +155,7 @@
       border: 1px solid var(--line);
       background: rgba(255,255,255,.03);
     }
-    table{ border-collapse: collapse; width:100%; font-size: 13px; min-width: 1200px; }
+    table{ border-collapse: collapse; width:100%; font-size: 13px; min-width: 1280px; }
     th,td{
       border: 1px solid rgba(255,255,255,.08);
       padding: 8px 10px;
@@ -357,7 +357,7 @@
       .field{ grid-column: span 12; }
       .field.small, .field.tiny{ grid-column: span 12; }
       .kpi{ grid-column: span 12; }
-      table{ min-width: 1120px; }
+      table{ min-width: 1280px; }
 
       .fx-box{ grid-column: span 12; }
       .fx-tools{ min-width: unset; justify-content:flex-start; }
@@ -402,13 +402,10 @@
 
       <div class="fx-area">
 
-        <!-- ① Mastercard + 扣减参数 合并 -->
+        <!-- ① Mastercard + 扣减参数（Ready 与 Master/原生） -->
         <div class="fx-box">
           <div class="fx-title">
-            <div>
-              <b>Mastercard</b>
-              <!-- 删除中文副标题：不显示“卡组织相关输入/按百分比输入” -->
-            </div>
+            <div><b>Mastercard</b></div>
           </div>
 
           <div class="fx-form">
@@ -429,14 +426,19 @@
 
             <div class="fx-dual">
               <div class="fx-row">
-                <div class="fx-label">Cashback（%）</div>
+                <div class="fx-label">cashback/R（%）</div>
                 <input class="input" id="cashbackPct" type="number" step="0.01" />
               </div>
 
               <div class="fx-row">
-                <div class="fx-label">税率（%）</div>
-                <input class="input" id="taxRatePct" type="number" step="0.01" />
+                <div class="fx-label">cashback/原生（%）</div>
+                <input class="input" id="cashbackNativePct" type="number" step="0.01" />
               </div>
+            </div>
+
+            <div class="fx-row">
+              <div class="fx-label">税率（%）</div>
+              <input class="input" id="taxRatePct" type="number" step="0.01" />
             </div>
           </div>
         </div>
@@ -538,8 +540,9 @@
       </div>
 
       <div class="hint" style="margin-top:10px;">
-        优惠幅度：填 15 表示优惠 15%（等价支付 85%）。免税 YES 时按 <code>/ (1 + 税率%)</code> 去税。Cashback 输入 3 表示 3%。<br/>
-        Alipay/Wechat 若切到 <b>抓取</b>：会用 <code>rates.json</code> 的公开参考价 × 抓取系数（%）。
+        优惠幅度：填 15 表示优惠 15%（等价支付 85%）。免税 YES 时按 <code>/ (1 + 税率%)</code> 去税。<br/>
+        cashback/R：用于 Ready；cashback/原生：用于 Master/原生（直接用 Mastercard JPY/R）。<br/>
+        渠道汇率若切到 <b>抓取</b>：会用 <code>rates.json</code> 的公开参考价 × 抓取系数（%）。
       </div>
     </div>
 
@@ -617,6 +620,7 @@
             <th>免税</th>
             <th>最优价格</th>
             <th>最优解</th>
+            <th>Master/原生</th>
             <th>RMB/SELL</th>
             <th>PROFIT</th>
             <th>原价/Master</th>
@@ -628,7 +632,7 @@
       </div>
 
       <div class="hint" style="margin-top:12px;">
-        最优解：在 Ready / VX / ZFB / Master 中取最小值；并列时按 Ready → VX → ZFB → Master 的优先级输出。
+        最优解：在 Ready / VX / ZFB / Master / Master/原生 中取最小值；并列时按 Ready → VX → ZFB → Master → Master/原生 的优先级输出。
       </div>
     </div>
 
@@ -637,7 +641,7 @@
   <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <script>
-    const KEY = "ready_v1_state_final_fx_auto_pct_v3";
+    const KEY = "ready_v1_state_final_fx_auto_pct_v5";
     const FXMODE_KEY = "fx_mode_v2"; // {alipay:"manual|auto", wechat:"manual|auto"}
 
     const defaultState = () => ({
@@ -649,8 +653,11 @@
         usdtCny: 6.97,
         usdtDiv1: 0.9986, // 提U磨损
         usdtDiv2: 0.9945, // T/C磨损
-        cashbackPct: 3,
+
+        cashbackPct: 3,          // cashback/R（用于 Ready）
+        cashbackNativePct: 0,    // cashback/原生（用于 Master/原生）
         taxRatePct: 10,
+
         sellJpyPer10kRmb: 500,
 
         // 抓取价微调系数（%）
@@ -842,29 +849,41 @@
       const jpyDiscount = jpy * payFactor * qty;
       const jpyTax = taxFree ? (jpyDiscount / taxDivisor) : jpyDiscount;
 
+      // Ready（USDC->CNY）+ cashback/R
       const usdcCny = calcUsdcCny(s);
       const usdcM = jpyTax * (n(s.mJpyPer10kUsdc,0) / 10000);
       const rmbU = usdcM * usdcCny;
-      const cashbackPct = toPct(s.cashbackPct, 3);
-      const cashback = rmbU * (cashbackPct / 100);
-      const ready = rmbU - cashback;
+      const cashbackRPct = toPct(s.cashbackPct, 0);
+      const cashbackR = rmbU * (cashbackRPct / 100);
+      const ready = rmbU - cashbackR;
 
+      // 渠道
       const vx = jpyTax * (n(s.vJpyPer10kRmb,0) / 10000);
       const zfb = jpyTax * (n(s.zJpyPer10kRmb,0) / 10000);
+
+      // Master（原有：不带 cashback）
       const master = jpyTax * (n(s.mJpyPer10kRmb,0) / 10000);
 
-      const min = Math.min(ready, vx, zfb, master);
-      let minLabel = "Master";
+      // Master/原生（新增：直接用 Mastercard JPY/R，带 cashback/原生）
+      const cashbackNativePct = toPct(s.cashbackNativePct, 0);
+      const cashbackNative = master * (cashbackNativePct / 100);
+      const masterNative = master - cashbackNative;
+
+      // 最小值比较（并列优先：Ready → VX → ZFB → Master → Master/原生）
+      const min = Math.min(ready, vx, zfb, master, masterNative);
+      let minLabel = "Master/原生";
       if (ready === min) minLabel = "Ready";
       else if (vx === min) minLabel = "VX";
       else if (zfb === min) minLabel = "ZFB";
-      else minLabel = "Master";
+      else if (master === min) minLabel = "Master";
+      else minLabel = "Master/原生";
 
       const sell = jpy * (n(s.sellJpyPer10kRmb,0) / 10000) * qty;
       const profit = sell - min;
+
       const originMaster = jpy * (n(s.mJpyPer10kRmb,0) / 10000) * qty;
 
-      return { min, minLabel, sell, profit, originMaster };
+      return { ready, vx, zfb, master, masterNative, min, minLabel, sell, profit, originMaster };
     }
 
     function syncSettingsToUI(){
@@ -876,8 +895,11 @@
       $("usdtCny").value        = s.usdtCny;
       $("usdtDiv1").value       = s.usdtDiv1;
       $("usdtDiv2").value       = s.usdtDiv2;
-      $("cashbackPct").value    = s.cashbackPct;
-      $("taxRatePct").value     = s.taxRatePct;
+
+      $("cashbackPct").value = s.cashbackPct;
+      $("cashbackNativePct").value = (s.cashbackNativePct ?? 0);
+
+      $("taxRatePct").value = s.taxRatePct;
       $("sellJpyPer10kRmb").value = s.sellJpyPer10kRmb;
 
       $("alipayAutoPct").value = (s.alipayAutoPct ?? 100.04);
@@ -895,7 +917,10 @@
       s.usdtCny        = n($("usdtCny").value, 0);
       s.usdtDiv1       = n($("usdtDiv1").value, 0.9986);
       s.usdtDiv2       = n($("usdtDiv2").value, 0.9945);
-      s.cashbackPct    = n($("cashbackPct").value, 0);
+
+      s.cashbackPct = n($("cashbackPct").value, 0);
+      s.cashbackNativePct = n($("cashbackNativePct").value, 0);
+
       s.taxRatePct     = n($("taxRatePct").value, 0);
       s.sellJpyPer10kRmb = n($("sellJpyPer10kRmb").value, 0);
 
@@ -917,7 +942,7 @@
     [
       "mJpyPer10kUsdc","mJpyPer10kRmb","zJpyPer10kRmb","vJpyPer10kRmb",
       "usdtCny","usdtDiv1","usdtDiv2",
-      "cashbackPct","taxRatePct","sellJpyPer10kRmb",
+      "cashbackPct","cashbackNativePct","taxRatePct","sellJpyPer10kRmb",
       "alipayAutoPct","wechatAutoPct"
     ].forEach(id => $(id).addEventListener("input", syncUIToSettings));
 
@@ -1099,7 +1124,8 @@
         const minClass =
           c.minLabel==="Ready" ? "min-ok" :
           c.minLabel==="VX" ? "min-warn" :
-          c.minLabel==="ZFB" ? "min-ok" : "min-bad";
+          c.minLabel==="ZFB" ? "min-ok" :
+          c.minLabel==="Master" ? "min-bad" : "min-bad";
 
         return `
           <tr data-id="${esc(it.id)}">
@@ -1120,6 +1146,8 @@
 
             <td class="${minClass}">${fmt(c.min)}</td>
             <td class="${minClass}">${esc(c.minLabel)}</td>
+
+            <td>${fmt(c.masterNative)}</td>
 
             <td>${fmt(c.sell)}</td>
             <td class="${c.profit>=0 ? "min-ok":"min-bad"}">${fmt(c.profit)}</td>
