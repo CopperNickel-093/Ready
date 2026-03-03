@@ -1,11 +1,11 @@
 {
   "source": "Frankfurter (ECB reference, daily updated)",
-  "fetched_at_utc": "2026-03-03T14:33:02.744Z",
-  "date": "2026-03-02",
+  "fetched_at_utc": "2026-03-03T17:32:10.983Z",
+  "date": "2026-03-03",
   "base": "JPY",
   "quote": "CNY",
-  "cny_per_jpy": 0.04371,
-  "jpy_per_10000_to_cny": 437.09999999999997,
-  "alipay_jpy_per_10k_rmb": 437.09999999999997,
-  "wechat_jpy_per_10k_rmb": 437.09999999999997
+  "cny_per_jpy": 0.04381,
+  "jpy_per_10000_to_cny": 438.1,
+  "alipay_jpy_per_10k_rmb": 438.1,
+  "wechat_jpy_per_10k_rmb": 438.1
 }
