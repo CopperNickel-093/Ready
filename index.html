@@ -1,0 +1,2133 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1020" />
+  <title>Ready 助手</title>
+
+  <style>
+    :root{
+      --bg:#040b18;
+      --bg2:#0a1730;
+      --panel: rgba(7, 18, 36, .74);
+      --panel-strong: rgba(5, 13, 28, .86);
+      --panel-soft: rgba(106, 222, 255, .08);
+      --text:#eef7ff;
+      --muted:#9ab2d4;
+      --line: rgba(126, 214, 255, .18);
+      --line-strong: rgba(164, 230, 255, .34);
+      --ok:#7df0c1;
+      --warn:#ffd783;
+      --bad:#ff9dad;
+      --btn1:#1f4fbb;
+      --btn2:#173b8c;
+      --accent:#8de3ff;
+      --cyan:#6fd8ff;
+      --shadow: 0 22px 70px rgba(0,0,0,.34);
+      --shadow-soft: 0 12px 36px rgba(0,0,0,.24);
+      --radius: 24px;
+      --red:#ff4f62;
+      --green:#26cd78;
+      --blue:#2f6fe4;
+      --auto:#ff5568;
+    }
+
+    *{ box-sizing:border-box; }
+    html{ scroll-behavior:smooth; }
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(93,220,255,.22), transparent 28%),
+        radial-gradient(circle at top right, rgba(74,122,255,.16), transparent 24%),
+        radial-gradient(circle at 50% 120%, rgba(10,33,84,.38), transparent 44%),
+        linear-gradient(180deg, #030816 0%, #061226 46%, #07162d 100%);
+      position:relative;
+      overflow-x:hidden;
+      padding: 22px 0 52px;
+    }
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      background:
+        linear-gradient(180deg, rgba(5,12,24,.44), rgba(4,10,18,.76)),
+        radial-gradient(circle at 16% 18%, rgba(121,226,255,.18), transparent 24%),
+        radial-gradient(circle at 84% 12%, rgba(88,116,255,.16), transparent 20%),
+        url('./back.png') center/cover no-repeat;
+      filter:saturate(1.06) brightness(.82) contrast(1.08);
+      transform:scale(1.035);
+      z-index:-2;
+    }
+    body::after{
+      content:"";
+      position:fixed;
+      inset:0;
+      background:
+        linear-gradient(180deg, rgba(7,17,34,.18), rgba(6,16,31,.54)),
+        repeating-linear-gradient(180deg, rgba(255,255,255,.012) 0 1px, transparent 1px 8px);
+      backdrop-filter: blur(10px);
+      z-index:-1;
+      pointer-events:none;
+    }
+
+    .container{
+      max-width: 1128px;
+      margin:0 auto;
+      padding: 0 22px;
+    }
+    .topbar{
+      position: sticky;
+      top: 0;
+      z-index: 70;
+      padding: 0 22px 8px;
+      background: transparent;
+      border-bottom: 0;
+    }
+    .topbar-inner{
+      display:grid;
+      grid-template-columns: auto 1fr auto;
+      align-items:center;
+      gap:16px;
+      padding: 14px 18px;
+      max-width: 1128px;
+      margin: 0 auto;
+      border:1px solid rgba(133,219,255,.18);
+      border-radius: 26px;
+      background:
+        linear-gradient(180deg, rgba(10,24,48,.82), rgba(7,16,33,.74));
+      box-shadow: 0 16px 44px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.05);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(22px);
+    }
+
+    .author{ display:flex; align-items:center; gap:12px; min-width: 220px; }
+    .avatar{
+      width: 42px; height: 42px; border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.05));
+      overflow:hidden;
+      display:flex; align-items:center; justify-content:center;
+      box-shadow: 0 12px 28px rgba(0,0,0,.22);
+      flex: 0 0 auto;
+    }
+    .avatar img{ width:100%; height:100%; object-fit: cover; display:none; }
+    .avatar .fallback{
+      font-weight: 900; font-size: 13px;
+      color: rgba(233,236,255,.88);
+      letter-spacing: .5px;
+      user-select:none;
+    }
+    .author-meta{ display:flex; flex-direction:column; gap:3px; }
+    .author-meta .name{ font-weight: 800; font-size: 13px; letter-spacing:.2px; }
+    .author-meta .tag{ color: var(--muted); font-size: 11px; text-transform:uppercase; letter-spacing:.12em; }
+
+    .brand{ display:flex; flex-direction:column; gap:4px; min-width:0; }
+    .brand .title{ font-weight: 900; letter-spacing:.02em; font-size: 20px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .brand .subtitle{ color: var(--muted); font-size: 12px; line-height:1.5; }
+
+    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+
+    .btn{
+      border: 1px solid rgba(140,198,255,.16);
+      background: linear-gradient(180deg, rgba(37,92,204,.96), rgba(22,57,139,.96));
+      color: var(--text);
+      padding: 11px 14px;
+      border-radius: 14px;
+      cursor:pointer;
+      font-weight: 800;
+      font-size: 13px;
+      line-height:1;
+      box-shadow: 0 12px 28px rgba(13,32,82,.30), inset 0 1px 0 rgba(255,255,255,.07);
+      user-select:none;
+      transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease, background .15s ease;
+    }
+    .btn:hover{ transform: translateY(-1px); box-shadow: 0 18px 36px rgba(17,34,73,.42); }
+    .btn.ghost{
+      background: linear-gradient(180deg, rgba(115,220,255,.075), rgba(115,220,255,.038));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
+      border-color: rgba(118,220,255,.16);
+    }
+    .btn.danger{ background: linear-gradient(180deg, rgba(193,56,73,.96), rgba(138,29,45,.96)); }
+    .btn:active{ transform: translateY(1px); }
+
+    .card{
+      position:relative;
+      overflow:hidden;
+      background:
+        linear-gradient(180deg, rgba(8,20,40,.78), rgba(6,15,30,.80));
+      border: 1px solid rgba(129,214,255,.15);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: 0 20px 56px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.04);
+      margin-top: 18px;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+    .card::before{
+      content:"";
+      position:absolute;
+      inset:0 0 auto 0;
+      height:1px;
+      background: linear-gradient(90deg, transparent, rgba(154,229,255,.62), transparent);
+      opacity:.92;
+    }
+    .card h3{
+      margin:0 0 12px 0;
+      font-size: 18px;
+      letter-spacing:.01em;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .card h3::before{
+      content:"";
+      width: 10px;
+      height: 10px;
+      border-radius:999px;
+      background: linear-gradient(180deg, rgba(125,214,255,1), rgba(125,214,255,.2));
+      box-shadow: 0 0 24px rgba(125,214,255,.52);
+      flex:0 0 auto;
+    }
+    .hint{ color: var(--muted); font-size: 12px; line-height: 1.65; }
+    code{
+      background: linear-gradient(180deg, rgba(118,220,255,.06), rgba(118,220,255,.03));
+      border:1px solid rgba(118,220,255,.10);
+      border-radius: 8px;
+      padding: 2px 6px;
+      color: #dbf4ff;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 10px;
+    }
+    .field{ grid-column: span 6; display:flex; flex-direction:column; gap:7px; }
+    .field.small{ grid-column: span 4; }
+    .field.tiny{ grid-column: span 2; }
+    .field.micro{ grid-column: span 2; }
+    .field.row-half{ grid-column: span 6; }
+    .field.row-third{ grid-column: span 4; }
+    .label{ font-size: 12px; color: var(--muted); letter-spacing:.02em; }
+    .input,
+    .table-control{
+      width:100%;
+      border: 1px solid rgba(198,223,255,.11);
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+      color: var(--text);
+      padding: 12px 13px;
+      border-radius: 14px;
+      outline: none;
+      font-size: 14px;
+      min-height: 46px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.035), 0 0 0 0 rgba(0,0,0,0);
+      transition: border-color .15s ease, box-shadow .15s ease, background .15s ease, transform .15s ease;
+    }
+    .input:focus,
+    .table-control:focus{
+      border-color: rgba(141,225,255,.58);
+      box-shadow: 0 0 0 4px rgba(117,220,255,.12), inset 0 1px 0 rgba(255,255,255,.04);
+      background: linear-gradient(180deg, rgba(255,255,255,.085), rgba(255,255,255,.05));
+    }
+    .input::placeholder{ color: rgba(233,236,255,.34); }
+    .input[disabled]{ opacity: .82; color: rgba(243,247,255,.9); }
+
+    select.input,
+    select.table-control{
+      appearance:none;
+      -webkit-appearance:none;
+      -moz-appearance:none;
+      padding-right: 40px;
+      background-image:
+        linear-gradient(45deg, transparent 50%, rgba(243,247,255,.85) 50%),
+        linear-gradient(135deg, rgba(243,247,255,.85) 50%, transparent 50%);
+      background-position:
+        calc(100% - 18px) calc(50% - 2px),
+        calc(100% - 13px) calc(50% - 2px);
+      background-size: 6px 6px, 6px 6px;
+      background-repeat:no-repeat;
+    }
+    select.input option,
+    select.table-control option{
+      background: #0b1020;
+      color: var(--text);
+    }
+
+    .hr{ height:1px; background: linear-gradient(90deg, transparent, var(--line), transparent); margin: 16px 0; }
+
+    .kpi-grid{
+      display:grid;
+      grid-template-columns: repeat(12, minmax(0,1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .kpi{
+      grid-column: span 3;
+      background: linear-gradient(180deg, rgba(255,255,255,.075), rgba(255,255,255,.032));
+      border:1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+    }
+    .kpi .k{ color: var(--muted); font-size: 12px; }
+    .kpi .v{ font-weight: 900; font-size: 20px; margin-top: 6px; }
+    .kpi .v.best-ready{ color:#b68cff; }
+    .kpi .v.best-master, .kpi .v.best-master-native{ color:#ffb061; }
+    .kpi .v.best-vx{ color:#53e38f; }
+    .kpi .v.best-alip, .kpi .v.best-zfb{ color:#78dcff; }
+    .kpi .v.best-channel{
+      font-weight: 1000;
+      font-size: 26px;
+      letter-spacing: .02em;
+      line-height: 1.1;
+    }
+
+    .badge,
+    .pill{
+      display:inline-flex; align-items:center; gap:6px;
+      font-size: 12px; padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(118,220,255,.09), rgba(118,220,255,.045));
+      color: #d9f6ff;
+      backdrop-filter: blur(8px);
+    }
+
+    .table-wrap{
+      overflow:auto;
+      border-radius: 20px;
+      border: 1px solid rgba(128,214,255,.14);
+      background: linear-gradient(180deg, rgba(255,255,255,.038), rgba(255,255,255,.02));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.03), 0 18px 38px rgba(0,0,0,.16);
+    }
+    table{ border-collapse: collapse; width:100%; font-size: 13px; min-width: 1060px; }
+    th,td{
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      padding: 10px 10px;
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+    tbody tr{ background: rgba(255,255,255,.016); }
+    tbody tr:nth-child(even){ background: rgba(255,255,255,.03); }
+    tbody tr:hover{ background: rgba(125,214,255,.075); }
+    th{
+      position: sticky; top:0;
+      background: rgba(7,17,34,.96);
+      backdrop-filter: blur(10px);
+      z-index: 2;
+      text-align:left;
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing:.04em;
+    }
+    td[contenteditable="true"]{ background: rgba(255,255,255,.03); cursor: text; }
+    td[contenteditable="true"]:focus{ outline:none; background: rgba(125,214,255,.09); }
+
+    .min-ok{ color: var(--ok); font-weight: 900; }
+    .min-warn{ color: var(--warn); font-weight: 900; }
+    .min-bad{ color: var(--bad); font-weight: 900; }
+
+    .toggle{
+      display:flex;
+      border:1px solid var(--line);
+      border-radius:14px;
+      overflow:hidden;
+      background: rgba(118,220,255,.05);
+      min-height: 46px;
+    }
+    .toggle button{
+      flex:1;
+      padding:11px 10px;
+      font-weight:800;
+      font-size:13px;
+      color: rgba(255,255,255,.8);
+      background: transparent;
+      border:0;
+      cursor:pointer;
+      transition: background .26s cubic-bezier(.22,.61,.36,1), color .22s ease, transform .22s ease, box-shadow .26s cubic-bezier(.22,.61,.36,1);
+    }
+    .toggle.small button{ padding:8px 10px; font-size:12px; }
+    .toggle button[data-v="NO"].active{ background: var(--red); color: #fff; }
+    .toggle button[data-v="YES"].active{ background: var(--green); color: #fff; }
+    .toggle button:not(.active){ color: rgba(233,236,255,.55); background: rgba(255,255,255,.02); }
+
+    .fxmode{
+      display:flex;
+      border:1px solid rgba(108, 207, 255, .18);
+      border-radius:13px;
+      overflow:hidden;
+      width: 144px;
+      max-width:100%;
+      flex:0 0 auto;
+      margin-left:auto;
+      background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.02));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+    }
+    .fxmode button{
+      flex:1;
+      min-width:0;
+      padding:8px 8px;
+      border:0;
+      cursor:pointer;
+      font-weight:800;
+      font-size:11px;
+      letter-spacing:.02em;
+      color:#fff;
+      opacity:.62;
+      background: rgba(255,255,255,.035);
+      transition: opacity .22s ease, transform .22s ease, box-shadow .22s ease, background .22s ease;
+    }
+    .fxmode button.active{ opacity:1; box-shadow: inset 0 1px 0 rgba(255,255,255,.14); }
+    .fxmode .manual{ background: linear-gradient(180deg, rgba(59,122,255,.96), rgba(38,78,204,.96)); }
+    .fxmode .auto{ background: linear-gradient(180deg, rgba(255,79,95,.95), rgba(171,38,58,.95)); }
+
+    .fxhint{
+      font-size:12px;
+      color: rgba(233,236,255,.74);
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.05);
+      border-radius: 999px;
+      padding: 6px 10px;
+      user-select:none;
+      display:none;
+      max-width: 360px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .fx-area{
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .fx-box{
+      grid-column: span 4;
+      border: 1px solid rgba(201,223,255,.11);
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.03));
+      border-radius: 22px;
+      padding: 16px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+      position:relative;
+      overflow:hidden;
+    }
+    .fx-box::after{
+      content:"";
+      position:absolute;
+      inset:auto -60px -60px auto;
+      width:140px; height:140px;
+      border-radius:999px;
+      background: radial-gradient(circle, rgba(103,215,255,.12), transparent 70%);
+      pointer-events:none;
+    }
+    .fx-box .fx-title{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .fx-box .fx-title b{ font-size: 14px; letter-spacing:.02em; color: rgba(243,247,255,.94); }
+    .fx-box .fx-sub{ font-size: 12px; color: var(--muted); margin-top: 4px; }
+    .fx-form{ display: grid; grid-template-columns: 1fr; gap: 14px; }
+    .fx-form > *,
+    .fx-dual > *,
+    .inline-field > *{ min-width:0; }
+    .fx-row{ display:flex; flex-direction:column; gap:8px; min-width:0; }
+    .fx-label{
+      font-size: 12px;
+      color: var(--muted);
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto;
+      align-items:center;
+      gap: 10px;
+      line-height:1.45;
+      min-width:0;
+    }
+    .label-nowrap{ white-space: nowrap; display:inline-block; min-width:0; }
+    .fx-tools{
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap: 8px;
+      flex-wrap: nowrap;
+      min-width: 0;
+      margin-left:auto;
+      justify-self:end;
+    }
+    .fx-dual{ display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .fx-dual.relaxed{ grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); align-items:start; }
+    .fx-dual.cashback-pair{
+      grid-template-columns: repeat(2, minmax(0, 168px));
+      justify-content:start;
+      gap: 12px;
+    }
+    .fx-dual.compact-pair{
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .fx-status-wrap{ display:flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; margin-top: 2px; }
+    .fx-status{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+      font-size: 12px;
+      color: rgba(233,236,255,.75);
+      user-select:none;
+      white-space: nowrap;
+    }
+    .fx-dot{ width: 8px; height: 8px; border-radius: 999px; background: rgba(255,255,255,.25); }
+    .fx-status.on{ border-color: rgba(255,79,95,.48); background: rgba(255,79,95,.12); color: rgba(255,255,255,.92); }
+    .fx-status.on .fx-dot{ background: var(--auto); }
+    .fx-status.off{ border-color: rgba(45,108,223,.44); background: rgba(45,108,223,.12); color: rgba(255,255,255,.92); }
+    .fx-status.off .fx-dot{ background: var(--blue); }
+
+    .inline-field{ display:grid; grid-template-columns: minmax(0, 1fr); gap:10px; align-items:stretch; width:100%; }
+    .inline-field .input.select,
+    .inline-field .input.number{ min-width: 0; width: 100%; max-width:100%; }
+    .mode-inline{
+      display:grid;
+      grid-template-columns: auto minmax(0,1fr);
+      gap:10px;
+      align-items:stretch;
+      width:100%;
+      min-width:0;
+    }
+    .mode-switch{
+      display:inline-flex;
+      align-items:stretch;
+      border:1px solid rgba(112,210,255,.18);
+      border-radius:16px;
+      overflow:hidden;
+      background: linear-gradient(180deg, rgba(96,196,255,.045), rgba(96,196,255,.025));
+      min-height:42px;
+      min-width:0;
+      flex-wrap:nowrap;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+    }
+    .mode-switch button{
+      min-width:40px;
+      padding: 0 10px;
+      border:0;
+      background: rgba(255,255,255,.025);
+      color: rgba(233,236,255,.72);
+      font-size:11px;
+      font-weight:800;
+      letter-spacing:.02em;
+      cursor:pointer;
+      transition: background .3s cubic-bezier(.22,.61,.36,1), color .24s ease, transform .24s ease, box-shadow .3s cubic-bezier(.22,.61,.36,1), filter .24s ease;
+      white-space:nowrap;
+      position:relative;
+    }
+    .mode-switch button + button{ border-left:1px solid rgba(255,255,255,.06); }
+    .mode-switch button.active{
+      color:#fff;
+      text-shadow: 0 0 10px rgba(255,255,255,.10);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 8px 18px rgba(0,0,0,.18);
+      transform: translateY(-1px) scale(1.01);
+      filter:saturate(1.06);
+    }
+    .mode-switch button[data-v="OFF"].active{ background: linear-gradient(180deg, rgba(255,84,103,.96), rgba(186,39,61,.96)); }
+        .mode-switch button[data-v="READY"].active{ background: linear-gradient(180deg, rgba(146,93,255,.96), rgba(95,53,204,.96)); }
+    .mode-switch button[data-v="MASTER"].active{ background: linear-gradient(180deg, rgba(255,163,78,.96), rgba(211,113,19,.96)); }
+    .mode-switch button[data-v="VX"].active{ background: linear-gradient(180deg, rgba(45,216,117,.96), rgba(22,146,73,.96)); }
+    .mode-switch button[data-v="ALIP"].active{ background: linear-gradient(180deg, rgba(108,215,255,.96), rgba(54,150,228,.96)); }
+    .mode-switch button:not(.active){ color: rgba(233,236,255,.68); background: rgba(255,255,255,.025); }
+    .mode-switch.compact button{ min-width:36px; padding:0 9px; }
+    .mode-switch.compact-5 button{ min-width:40px; padding:0 8px; }
+    #cashbackCapModeSwitch{ width:100%; min-width:0; max-width:240px; border-radius: 10px; display:grid; grid-template-columns:repeat(5, minmax(0, 1fr)); }
+    #cashbackCapModeSwitch button{ min-width: 0; width:100%; border-radius:0; padding:0 0; font-size:13px; }
+    .mode-switch button[data-v="ALL"].active{ background: linear-gradient(180deg, rgba(86,197,255,.96), rgba(34,115,210,.94)); text-shadow:none; }
+    .mode-switch button[title]{ position:relative; }
+    .input.hidden-mode{ display:none; }
+    .cap-row{
+      padding: 14px;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.018));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
+      min-width:0;
+      overflow:hidden;
+    }
+    .cap-row .fx-label{ margin-bottom: 2px; }
+    .cap-inline-row{display:grid;grid-template-columns:minmax(0,220px) minmax(56px,72px);gap:8px;align-items:center;min-width:0;justify-content:start;}
+    .cap-label{font-size:13px;font-weight:600;color:var(--text);}
+    .cap-amount{min-width:0;width:100%;}
+    .field-hint{ font-size: 11px; color: rgba(233,236,255,.6); line-height: 1.55; }
+    .promo-cell{ min-width: 74px; }
+
+    
+    @media (max-width: 640px){
+      .cap-inline-row{ grid-template-columns:minmax(0,1fr) 64px; gap:8px; }
+      #cashbackCapModeSwitch{ max-width:none; }
+    }
+@media (max-width: 1180px){
+      .kpi{ grid-column: span 6; }
+      .topbar-inner{ grid-template-columns: 1fr; align-items:flex-start; }
+      .fx-box{ grid-column: span 6; }
+      .fx-dual, .fx-dual.relaxed{ grid-template-columns: 1fr; }
+      .fx-dual.cashback-pair, .fx-dual.compact-pair{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .field.small{ grid-column: span 6; }
+      .field.tiny{ grid-column: span 3; }
+    }
+    @media (max-width: 860px){
+      body{ padding-top: 14px; }
+      .topbar{ padding: 0 12px 8px; }
+      .container{ padding: 0 12px; }
+      .topbar-inner{ padding: 14px; border-radius: 22px; }
+      .brand .title{ font-size: 18px; }
+      .card{ padding: 16px; border-radius: 22px; }
+      .field, .field.small, .field.tiny, .kpi, .fx-box{ grid-column: span 12; }
+      .fx-tools{ min-width: unset; justify-content:flex-start; }
+      .fxmode{ width: 100%; }
+      .fxhint{ max-width: 100%; }
+      .inline-field{ grid-template-columns: 1fr; }
+      .mode-inline{ grid-template-columns: 1fr; }
+      .cap-inline-row{ grid-template-columns: 1fr; }
+      .cap-amount{ max-width:none; }
+      .mode-switch{ width:100%; }
+      .mode-switch button{ flex:1; }
+      table{ min-width: 1180px; }
+    }
+    @media (max-width: 560px){
+      .author{ min-width: 0; }
+      .row{ width:100%; }
+      .row .btn{ flex:1; justify-content:center; }
+      .card h3{ font-size: 17px; }
+      .btn{ width:100%; }
+    }
+
+
+    /* v7.3 visual compact override */
+    :root{
+      --text:#97e9ff;
+      --muted:#63c9f3;
+      --accent:#4fdaff;
+      --cyan:#38d0ff;
+      --line: rgba(79, 218, 255, .16);
+      --line-strong: rgba(115, 232, 255, .34);
+    }
+    body{
+      font-family: Inter, "SF Pro Display", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+      letter-spacing: .01em;
+    }
+    .container{ max-width: 1128px; }
+    .topbar-inner{
+      border-radius: 22px;
+      padding: 12px 16px;
+      border-color: rgba(92,220,255,.16);
+      background: linear-gradient(180deg, rgba(7,19,39,.82), rgba(5,13,28,.78));
+      box-shadow: 0 14px 34px rgba(0,0,0,.24), inset 0 1px 0 rgba(126,240,255,.05);
+    }
+    .author{ gap:10px; min-width: 200px; }
+    .avatar{ width:38px; height:38px; border-radius:12px; }
+    .author-meta .name{ font-size:12px; color: var(--text); }
+    .author-meta .tag{ font-size:10px; color: var(--muted); }
+    .brand{ gap:2px; }
+    .brand .title{
+      font-size: 18px;
+      color: #b48dff;
+      text-shadow: 0 0 12px rgba(154,101,255,.18);
+    }
+    .brand .subtitle{ font-size: 11px; color: var(--muted); }
+    .row{ gap:8px; }
+    .btn{
+      padding: 9px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 750;
+      border-color: rgba(70,205,255,.16);
+      background: linear-gradient(180deg, rgba(18,56,118,.92), rgba(10,31,74,.94));
+      box-shadow: 0 8px 22px rgba(2,12,28,.22), inset 0 1px 0 rgba(114,233,255,.06);
+    }
+    .btn.ghost{
+      background: linear-gradient(180deg, rgba(58,194,255,.06), rgba(58,194,255,.025));
+      color: #86e9ff;
+      border-color: rgba(79,218,255,.14);
+    }
+    .btn.danger{
+      background: linear-gradient(180deg, rgba(155,38,67,.92), rgba(104,18,38,.94));
+    }
+    .card{
+      border-radius: 20px;
+      padding: 15px;
+      border-color: rgba(90,210,255,.14);
+      background: linear-gradient(180deg, rgba(5,15,31,.78), rgba(4,11,24,.82));
+      box-shadow: 0 16px 38px rgba(0,0,0,.24), inset 0 1px 0 rgba(127,239,255,.035);
+    }
+    .card::before{ opacity: .72; }
+    .card h2,
+    .card h3,
+    .card legend,
+    .headline,
+    .section-head,
+    .card-title{
+      color: #8ee8ff;
+      font-size: 13px !important;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      font-weight: 800;
+    }
+    .hint,
+    .helper,
+    .desc,
+    .tips,
+    .caption,
+    .note,
+    .help-text,
+    .card p.small,
+    .section-desc{
+      font-size: 11px;
+      color: rgba(99,201,243,.82);
+    }
+    .grid{ gap:10px; margin-top:8px; }
+    .field{ gap:6px; }
+    .label{
+      font-size: 11px;
+      color: #73d7ff;
+      letter-spacing: .04em;
+      font-weight: 650;
+    }
+    .input,
+    .table-control{
+      min-height: 40px;
+      padding: 9px 11px;
+      border-radius: 12px;
+      font-size: 13px;
+      color: #a7f1ff;
+      border-color: rgba(76,210,255,.14);
+      background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.02));
+      box-shadow: inset 0 1px 0 rgba(115,232,255,.028), 0 0 0 0 rgba(0,0,0,0);
+    }
+    .input::placeholder{ color: rgba(122,203,236,.42); }
+    .input:focus,
+    .table-control:focus{
+      border-color: rgba(83,220,255,.5);
+      box-shadow: 0 0 0 3px rgba(71,214,255,.11), inset 0 1px 0 rgba(115,232,255,.04);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.028));
+    }
+    select.input,
+    select.table-control{
+      background-size: 7px 7px, 7px 7px, 1px 18px;
+      background-position:
+        calc(100% - 17px) calc(50% - 2px),
+        calc(100% - 12px) calc(50% - 2px),
+        calc(100% - 33px) 50%;
+    }
+    .badge,
+    .pill{
+      font-size:11px;
+      padding:4px 9px;
+      color:#8fe8ff;
+      border-color: rgba(82,216,255,.14);
+      background: linear-gradient(180deg, rgba(58,194,255,.08), rgba(58,194,255,.03));
+    }
+    .table-wrap{
+      border-radius: 18px;
+      border-color: rgba(90,210,255,.13);
+      background: linear-gradient(180deg, rgba(255,255,255,.026), rgba(255,255,255,.012));
+      box-shadow: inset 0 1px 0 rgba(115,232,255,.028), 0 14px 30px rgba(0,0,0,.14);
+    }
+    table{ font-size: 12px; }
+    th,td{ padding: 8px 9px; }
+    th{
+      font-size: 11px;
+      color: #72d8ff;
+      background: rgba(4,13,28,.95);
+      letter-spacing: .05em;
+    }
+    tbody tr:hover{ background: rgba(55,208,255,.06); }
+    .toggle,
+    .fxmode{
+      min-height: 40px;
+      border-radius: 12px;
+      border-color: rgba(79,218,255,.14);
+      background: rgba(58,194,255,.035);
+    }
+    .toggle button{
+      padding: 8px 8px;
+      font-size: 11px;
+      font-weight: 800;
+      color: #7ddfff;
+      letter-spacing: .02em;
+    }
+    .toggle.small button,
+    .fxmode button{
+      padding: 7px 8px;
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .toggle button:not(.active),
+    .fxmode button:not(.active){
+      color: rgba(125,223,255,.72);
+      background: rgba(255,255,255,.014);
+    }
+    .toggle button.active,
+    .fxmode button.active{
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 0 16px rgba(56,208,255,.12);
+    }
+    .fxmode{ width: 156px; }
+    .toggle.small{ min-height: 36px; }
+    .summary,
+    .summary-item,
+    .mini-stat,
+    .stat{
+      border-color: rgba(79,218,255,.12);
+      background: linear-gradient(180deg, rgba(58,194,255,.055), rgba(58,194,255,.018));
+    }
+    @media (max-width: 760px){
+      .kpi{ grid-column: span 12; }
+      .topbar-inner{ padding: 11px 12px; }
+      .brand .title{ font-size: 16px; }
+      .btn{ padding: 8px 10px; font-size: 11px; }
+      .card{ padding: 13px; }
+      .input,.table-control{ min-height: 38px; font-size: 12px; }
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="author">
+        <div class="avatar" id="avatarBox" title="Copper Nickel">
+          <img id="avatarImg" alt="Copper Nickel" />
+          <div class="fallback" id="avatarFallback">CN</div>
+        </div>
+        <div class="author-meta">
+          <div class="name">Copper Nickel</div>
+          <div class="tag">蓮ノ空女学院 経済学部 · v7.7</div>
+        </div>
+      </div>
+
+      <div class="brand">
+        <div class="title">Ready 助手 <span class="badge">By 药师寺李友儿子</span></div>
+        <div class="subtitle">数据仅保存在本机浏览器（localStorage），不上传服务器</div>
+      </div>
+
+      <div class="row">
+        <button class="btn ghost" id="btnExport">导出JSON</button>
+        <button class="btn ghost" id="btnImport">导入JSON</button>
+        <button class="btn danger" id="btnReset">重置</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <div class="card">
+      <h3>汇率 / 参数</h3>
+
+      <div class="fx-area">
+
+        <!-- ① Mastercard + 扣减参数 -->
+        <div class="fx-box">
+          <div class="fx-title">
+            <div><b>Mastercard</b></div>
+          </div>
+
+          <div class="fx-form">
+            <div class="fx-row">
+              <div class="fx-label">Mastercard JPY/U（每 10000 JPY = ? USDC）</div>
+              <input class="input" id="mJpyPer10kUsdc" type="number" step="0.0001" />
+            </div>
+
+            <div class="fx-row">
+              <div class="fx-label">Mastercard JPY/R（每 10000 JPY = ? RMB）</div>
+              <input class="input" id="mJpyPer10kRmb" type="number" step="0.0001" />
+            </div>
+
+            <div class="fx-row">
+              <div class="fx-label">SELL JPY/R（每 10000 JPY = ? RMB）</div>
+              <input class="input" id="sellJpyPer10kRmb" type="number" step="0.0001" />
+            </div>
+
+            <div class="fx-dual cashback-pair">
+              <div class="fx-row">
+                <div class="fx-label">cashback/R（%）</div>
+                <input class="input" id="cashbackPct" type="number" step="0.01" />
+              </div>
+
+              <div class="fx-row">
+                <div class="fx-label">cashback/原生（%）</div>
+                <input class="input" id="cashbackNativePct" type="number" step="0.01" />
+              </div>
+            </div>
+
+            <div class="fx-row cap-row">
+              <div class="cap-label">cashback上限</div>
+              <div class="cap-inline-row">
+                <div class="mode-switch compact-5" id="cashbackCapModeSwitch" aria-label="cashback上限渠道">
+                  <button type="button" data-v="OFF" title="关闭">关</button>
+                  <button type="button" data-v="READY" title="Ready">R</button>
+                  <button type="button" data-v="MASTER" title="Master">M</button>
+                  <button type="button" data-v="VX" title="VX">VX</button>
+                  <button type="button" data-v="ALIP" title="AliP">AP</button>
+                </div>
+                <input class="input hidden-mode" id="cashbackCapMode" value="OFF" />
+                <input class="input number cap-amount" id="cashbackCapAmount" type="number" step="0.01" placeholder="上限金额" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ② Channels + 平衡点 -->
+        <div class="fx-box">
+          <div class="fx-title">
+            <div>
+              <b>渠道汇率</b>
+              <div class="fx-sub">可手动 / 可抓取</div>
+            </div>
+
+            <div class="fx-status-wrap">
+              <span class="fx-status off" id="fxstatus-alipay" title="Alipay 模式">
+                <span class="fx-dot"></span><span id="fxstatus-alipay-text">Alipay: OFF</span>
+              </span>
+              <span class="fx-status off" id="fxstatus-wechat" title="Wechat 模式">
+                <span class="fx-dot"></span><span id="fxstatus-wechat-text">Wechat: OFF</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="fx-form">
+            <div class="fx-row">
+              <div class="fx-label">
+                <span class="label-nowrap">Alipay JPY/R</span>
+                <span class="fx-tools">
+                  <span class="fxmode" data-fx="alipay">
+                    <button type="button" class="manual active">手动</button>
+                    <button type="button" class="auto">抓取</button>
+                  </span>
+                  <span class="fxhint" id="fxhint-alipay"></span>
+                </span>
+              </div>
+              <input class="input" id="zJpyPer10kRmb" type="number" step="0.0001" />
+            </div>
+
+            <div class="fx-row">
+              <div class="fx-label">
+                <span class="label-nowrap">Wechat JPY/R（VX）</span>
+                <span class="fx-tools">
+                  <span class="fxmode" data-fx="wechat">
+                    <button type="button" class="manual active">手动</button>
+                    <button type="button" class="auto">抓取</button>
+                  </span>
+                  <span class="fxhint" id="fxhint-wechat"></span>
+                </span>
+              </div>
+              <input class="input" id="vJpyPer10kRmb" type="number" step="0.0001" />
+            </div>
+
+            <div class="fx-row">
+              <div class="fx-label">平衡点基准（Ready = 基准）</div>
+              <select class="input" id="breakevenBase">
+                <option value="VX">VX（Wechat JPY/R）</option>
+                <option value="ZFB">ZFB（Alipay JPY/R）</option>
+                <option value="MASTER_NATIVE">Master/原生（Mastercard JPY/R - cashback/原生）</option>
+              </select>
+            </div>
+
+            <div class="fx-row">
+              <div class="fx-label">平衡点（Ready = 基准 时 USDT/CNY 买取）</div>
+              <input class="input" id="breakevenUsdtCny" type="text" disabled />
+            </div>
+
+            <div class="fx-dual" id="fxAutoPctBox" style="display:none;">
+              <div class="fx-row">
+                <div class="fx-label">Alipay 抓取系数（%）</div>
+                <input class="input" id="alipayAutoPct" type="number" step="0.01" />
+              </div>
+              <div class="fx-row">
+                <div class="fx-label">Wechat 抓取系数（%）</div>
+                <input class="input" id="wechatAutoPct" type="number" step="0.01" />
+              </div>
+            </div>
+          </div>
+
+          <div class="hint" style="margin-top:10px;">
+            平衡点计算：以所选基准渠道为目标（Ready=基准），反推 USDT/CNY（买取）应为多少。
+          </div>
+        </div>
+
+        <!-- ③ USDT/USDC（差值/清单合计差额在此） -->
+        <div class="fx-box">
+          <div class="fx-title">
+            <div>
+              <b>USDT / USDC</b>
+              <div class="fx-sub">USDC/CNY 自动计算</div>
+            </div>
+          </div>
+
+          <div class="fx-form">
+            <div class="fx-row">
+              <div class="fx-label">USDT/CNY（买取）</div>
+              <input class="input" id="usdtCny" type="number" step="0.0001" />
+            </div>
+
+            <div class="fx-dual cashback-pair">
+              <div class="fx-row">
+                <div class="fx-label">提U磨损</div>
+                <input class="input" id="usdtDiv1" type="number" step="0.0001" />
+              </div>
+              <div class="fx-row">
+                <div class="fx-label">T/C磨损</div>
+                <input class="input" id="usdtDiv2" type="number" step="0.0001" />
+              </div>
+            </div>
+
+            <div class="fx-row">
+              <div class="fx-label">USDC/CNY（自动）</div>
+              <input class="input" id="usdcCny" type="number" step="0.0001" disabled />
+            </div>
+
+            <div class="fx-row">
+              <div class="fx-label">差值（当前 USDT 买取 - 平衡点）</div>
+              <input class="input" id="breakevenDeltaUsdt" type="text" disabled />
+            </div>
+
+            <div class="fx-row">
+              <div class="fx-label">清单合计差额（Σ Ready - Σ 基准）</div>
+              <input class="input" id="sumDiffReadyBase" type="text" disabled />
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="hint" style="margin-top:10px;">
+        优惠幅度：填 15 表示优惠 15%（等价支付 85%）。免税 YES 时按 <code>/ (1 + 税率%)</code> 去税。<br/>
+        cashback/R、cashback/原生 都是“百分号直接输入”：填 1 就是 1%（不会当 100%）。
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>添加商品</h3>
+      <div class="grid">
+        <div class="field small">
+          <div class="label">平台（自由输入）</div>
+          <input class="input" id="platform" placeholder="例如 Ready / VX / ZFB / Master…" />
+        </div>
+
+        <div class="field tiny">
+          <div class="label">商品分类</div>
+          <input class="input" id="category" placeholder="例如 耳机 / 线材 / 配件…" />
+        </div>
+
+        <div class="field">
+          <div class="label">商品名</div>
+          <input class="input" id="name" placeholder="例如 耳机 / 配件…" />
+        </div>
+
+        <div class="field row-third">
+          <div class="label">JPY（单价）</div>
+          <input class="input" id="jpy" type="number" step="1" placeholder="例如 98000" />
+        </div>
+
+        <div class="field micro">
+          <div class="label">数量</div>
+          <input class="input" id="qty" type="number" step="1" placeholder="1" />
+        </div>
+
+        <div class="field micro">
+          <div class="label">是否免税</div>
+          <div class="toggle" id="taxFreeToggle">
+            <button type="button" data-v="NO" class="active">NO</button>
+            <button type="button" data-v="YES">YES</button>
+          </div>
+        </div>
+
+        <div class="field micro">
+          <div class="label">税率（%）</div>
+          <input class="input" id="taxRatePct" type="number" step="0.01" />
+        </div>
+
+        <div class="field row-half">
+          <div class="label">优惠幅度 1</div>
+          <div class="mode-inline">
+            <div class="mode-switch compact" id="promo1ModeSwitch" aria-label="优惠幅度1渠道">
+              <button type="button" data-v="ALL" title="ALL">ALL</button>
+              <button type="button" data-v="READY" title="Ready">R</button>
+              <button type="button" data-v="MASTER" title="Master">M</button>
+              <button type="button" data-v="VX" title="VX">VX</button>
+              <button type="button" data-v="ALIP" title="AliP">AP</button>
+            </div>
+            <input class="input hidden-mode" id="promo1Mode" value="ALL" />
+            <input class="input number" id="promo1OffPct" type="number" step="0.01" placeholder="例如 15" />
+          </div>
+        </div>
+
+        <div class="field row-half">
+          <div class="label">优惠幅度 2</div>
+          <div class="mode-inline">
+            <div class="mode-switch compact" id="promo2ModeSwitch" aria-label="优惠幅度2渠道">
+              <button type="button" data-v="ALL" title="ALL">ALL</button>
+              <button type="button" data-v="READY" title="Ready">R</button>
+              <button type="button" data-v="MASTER" title="Master">M</button>
+              <button type="button" data-v="VX" title="VX">VX</button>
+              <button type="button" data-v="ALIP" title="AliP">AP</button>
+            </div>
+            <input class="input hidden-mode" id="promo2Mode" value="ALL" />
+            <input class="input number" id="promo2OffPct" type="number" step="0.01" placeholder="例如 0 / 15" />
+          </div>
+        </div>
+      </div>
+
+
+      <div class="row" style="margin-top:12px;">
+        <button class="btn" id="btnAdd">添加</button>
+        <button class="btn ghost" id="btnImportExcel">从 Excel 导入</button>
+        <input id="excelFile" type="file" accept=".xlsx,.xls" style="display:none;" />
+      </div>
+
+      <div class="hint" style="margin-top:10px;">
+        Excel 导入：读取第 1 个 Sheet。折扣列若是“0.85 / 85（表示支付85%）”，会自动转成“优惠15%”。免税列可识别 YES/NO、TRUE/FALSE、1/0。
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>清单 <span class="badge">点击单元格可编辑（自动保存）</span></h3>
+
+      <div class="kpi-grid" id="kpis"></div>
+
+      <div class="hr"></div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+          <tr>
+            <th>#</th>
+            <th>商品名</th>
+            <th>JPY</th>
+            <th>数量</th>
+            <th>优惠1渠道</th>
+            <th>优惠1%</th>
+            <th>优惠2渠道</th>
+            <th>优惠2%</th>
+            <th>免税</th>
+            <th>最优价格</th>
+            <th>最优解</th>
+            <th>RMB/SELL</th>
+            <th>PROFIT</th>
+            <th>原价/Master</th>
+            <th>操作</th>
+          </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="hint" style="margin-top:12px;">
+        最优解：在 Ready / VX / ZFB / Master / Master/原生 中取最小值；并列时按 Ready → VX → ZFB → Master → Master/原生 的优先级输出。
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <script>
+    const KEY = "ready_v1_state_final_fx_auto_pct_v11_channel_promo_cap";
+    const FXMODE_KEY = "fx_mode_v2"; // {alipay:"manual|auto", wechat:"manual|auto"}
+
+    const defaultState = () => ({
+      settings: {
+        mJpyPer10kUsdc: 63.9,
+        mJpyPer10kRmb: 443.49,
+        zJpyPer10kRmb: 444.65,
+        vJpyPer10kRmb: 443.86,
+        usdtCny: 6.97,
+        usdtDiv1: 0.9986,
+        usdtDiv2: 0.9945,
+
+        cashbackPct: 3,          // % input
+        cashbackNativePct: 0,    // % input
+        taxRatePct: 10,          // % input
+        cashbackCapMode: "OFF",
+        cashbackCapAmount: 0,
+
+        sellJpyPer10kRmb: 500,
+
+        alipayAutoPct: 100.04,   // % input
+        wechatAutoPct: 97.73,    // % input
+
+        breakevenBase: "VX" // VX | ZFB | MASTER | MASTER_NATIVE
+      },
+      items: []
+    });
+
+    function loadState(){
+      try{
+        const raw = localStorage.getItem(KEY);
+        if(!raw) return defaultState();
+        const s = JSON.parse(raw);
+        return {
+          settings: { ...defaultState().settings, ...(s.settings||{}) },
+          items: Array.isArray(s.items) ? s.items : []
+        };
+      }catch{
+        return defaultState();
+      }
+    }
+
+    let state = loadState();
+    function saveState(){ localStorage.setItem(KEY, JSON.stringify(state)); }
+
+    const fxMode = (() => {
+      try { return JSON.parse(localStorage.getItem(FXMODE_KEY) || "{}"); }
+      catch { return {}; }
+    })();
+
+    let lastRaw = { alipay: NaN, wechat: NaN, fetchedAt: "" };
+
+    const $ = (id) => document.getElementById(id);
+    const n = (v, def=0) => { const x = Number(v); return Number.isFinite(x) ? x : def; };
+    const esc = (s)=> String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    const clamp = (x, lo, hi) => Math.min(hi, Math.max(lo, x));
+    const PROMO_MODES = ["ALL","READY","MASTER","VX","ALIP"];
+    function normPromoMode(v, def="ALL"){
+      const x = String(v ?? def).trim().toUpperCase();
+      if(x === "OFF" || x === "关闭") return "OFF";
+      return PROMO_MODES.includes(x) ? x : def;
+    }
+    function promoApplies(mode, channel){
+      const m = normPromoMode(mode, "ALL");
+      const c = String(channel || "").toUpperCase();
+      return m === "ALL" || m === c;
+    }
+    function applyCashbackCap(amountAfter, originalAmount, capMode, capAmount, channel){
+      const m = normPromoMode(capMode, "OFF");
+      if(m === "OFF" || String(channel).toUpperCase() !== m) return amountAfter;
+      const deduction = Math.max(0, n(originalAmount,0) - n(amountAfter,0));
+      const cap = Math.max(0, n(capAmount, 0));
+      if(cap <= 0) return originalAmount;
+      return originalAmount - Math.min(deduction, cap);
+    }
+
+    // 旧逻辑保留（用于兼容历史导入/旧字段）
+    function toPct(v, defaultPct){
+      const x = n(v, NaN);
+      if(!Number.isFinite(x)) return defaultPct;
+      if(x <= 0) return defaultPct;
+      if(x <= 1.5) return x * 100;
+      return x;
+    }
+
+    // ✅ 百分号“直接输入”：填 1 就是 1%（不会当 100%）
+    function pct01(v, defaultPct){
+      const x = n(v, NaN);
+      const pct = Number.isFinite(x) ? x : defaultPct;
+      return clamp(pct / 100, 0, 0.999999); // 避免 100% 导致归零
+    }
+
+    function payToOffPct(v, defaultOff=0){
+      const payPct = toPct(v, 100);
+      return clamp(100 - payPct, 0, 100);
+    }
+
+    function toOffPct(v, defaultOff=0){
+      const x = n(v, NaN);
+      if(!Number.isFinite(x)) return defaultOff;
+      if(x < 0) return 0;
+      if(x <= 1.5) return clamp(x * 100, 0, 100);
+      return clamp(x, 0, 100);
+    }
+
+    function calcUsdcCny(s){
+      const div1 = n(s.usdtDiv1, 0.9986);
+      const div2 = n(s.usdtDiv2, 0.9945);
+      return n(s.usdtCny,0) / div1 / div2;
+    }
+
+    function calcBasePrice(jpyAfterTax, s){
+      const base = String(s.breakevenBase || "VX").toUpperCase();
+      if(base === "VX"){
+        const raw = jpyAfterTax * (n(s.vJpyPer10kRmb,0) / 10000);
+        return applyCashbackCap(raw, raw, s.cashbackCapMode, s.cashbackCapAmount, "VX");
+      }
+      if(base === "ZFB"){
+        const raw = jpyAfterTax * (n(s.zJpyPer10kRmb,0) / 10000);
+        return applyCashbackCap(raw, raw, s.cashbackCapMode, s.cashbackCapAmount, "ALIP");
+      }
+      if(base === "MASTER"){
+        const raw = jpyAfterTax * (n(s.mJpyPer10kRmb,0) / 10000);
+        return applyCashbackCap(raw, raw, s.cashbackCapMode, s.cashbackCapAmount, "MASTER");
+      }
+      if(base === "MASTER_NATIVE"){
+        const master = jpyAfterTax * (n(s.mJpyPer10kRmb,0) / 10000);
+        const cbN = pct01(s.cashbackNativePct, 0);
+        const afterCb = master * (1 - cbN);
+        return applyCashbackCap(afterCb, master, s.cashbackCapMode, s.cashbackCapAmount, "MASTER");
+      }
+      const raw = jpyAfterTax * (n(s.vJpyPer10kRmb,0) / 10000);
+      return applyCashbackCap(raw, raw, s.cashbackCapMode, s.cashbackCapAmount, "VX");
+    }
+
+    function calcBreakEvenUsdtCny(s){
+      const mU = n(s.mJpyPer10kUsdc, NaN);
+      const cbR = pct01(s.cashbackPct, 0);
+      const div1 = n(s.usdtDiv1, NaN);
+      const div2 = n(s.usdtDiv2, NaN);
+
+      if(!Number.isFinite(mU) || mU <= 0) return NaN;
+      if(cbR >= 1) return NaN;
+      if(!Number.isFinite(div1) || !Number.isFinite(div2) || div1<=0 || div2<=0) return NaN;
+
+      let base10k = NaN;
+      const base = String(s.breakevenBase || "VX").toUpperCase();
+
+      if(base === "VX"){
+        base10k = n(s.vJpyPer10kRmb, NaN);
+      }else if(base === "ZFB"){
+        base10k = n(s.zJpyPer10kRmb, NaN);
+      }else if(base === "MASTER"){
+        base10k = n(s.mJpyPer10kRmb, NaN);
+      }else if(base === "MASTER_NATIVE"){
+        const mR = n(s.mJpyPer10kRmb, NaN);
+        const cbN = pct01(s.cashbackNativePct, 0);
+        if(!Number.isFinite(mR) || cbN >= 1) return NaN;
+        base10k = mR * (1 - cbN);
+      }else{
+        base10k = n(s.vJpyPer10kRmb, NaN);
+      }
+
+      if(!Number.isFinite(base10k) || base10k <= 0) return NaN;
+
+      const usdcCnyStar = base10k / (mU * (1 - cbR));
+      const usdtCnyStar = usdcCnyStar * div1 * div2;
+      return usdtCnyStar;
+    }
+
+    function setTaxFreeToggle(v){
+      const val = String(v||'NO').toUpperCase()==='YES' ? 'YES' : 'NO';
+      document.querySelectorAll('#taxFreeToggle button').forEach(b=>{
+        b.classList.toggle('active', b.getAttribute('data-v') === val);
+      });
+    }
+    function getTaxFreeFromToggle(){
+      const el = document.querySelector('#taxFreeToggle button.active');
+      return el ? el.getAttribute('data-v') : 'NO';
+    }
+    document.getElementById('taxFreeToggle').addEventListener('click', (e)=>{
+      const btn = e.target.closest('button[data-v]');
+      if(!btn) return;
+      setTaxFreeToggle(btn.getAttribute('data-v'));
+    });
+
+    function setModeSwitch(groupId, inputId, value){
+      const group = document.getElementById(groupId);
+      const input = document.getElementById(inputId);
+      if(!group || !input) return;
+      const val = String(value || input.value || '').toUpperCase();
+      input.value = val;
+      group.querySelectorAll('button[data-v]').forEach(btn=>{
+        btn.classList.toggle('active', btn.getAttribute('data-v') === val);
+      });
+    }
+    function bindModeSwitch(groupId, inputId, fallback){
+      const group = document.getElementById(groupId);
+      const input = document.getElementById(inputId);
+      if(!group || !input) return;
+      setModeSwitch(groupId, inputId, input.value || fallback);
+      group.addEventListener('click', (e)=>{
+        const btn = e.target.closest('button[data-v]');
+        if(!btn) return;
+        const val = btn.getAttribute('data-v');
+        setModeSwitch(groupId, inputId, val);
+        input.dispatchEvent(new Event('input', { bubbles:true }));
+      });
+    }
+
+    function updateFxAutoPctVisibility(){
+      const box = $("fxAutoPctBox");
+      if(!box) return;
+      const anyAuto = ((fxMode.alipay || "manual") === "auto") || ((fxMode.wechat || "manual") === "auto");
+      box.style.display = anyAuto ? "" : "none";
+    }
+
+    function updateFxStatus(){
+      const a = (fxMode.alipay || "manual") === "auto";
+      const w = (fxMode.wechat || "manual") === "auto";
+
+      const aBox = $("fxstatus-alipay");
+      const wBox = $("fxstatus-wechat");
+      const aText = $("fxstatus-alipay-text");
+      const wText = $("fxstatus-wechat-text");
+
+      if(aBox && aText){
+        aBox.classList.toggle("on", a);
+        aBox.classList.toggle("off", !a);
+        aText.textContent = `Alipay: ${a ? "ON" : "OFF"}`;
+      }
+      if(wBox && wText){
+        wBox.classList.toggle("on", w);
+        wBox.classList.toggle("off", !w);
+        wText.textContent = `Wechat: ${w ? "ON" : "OFF"}`;
+      }
+      updateFxAutoPctVisibility();
+    }
+
+    function setFxMode(which, mode){
+      fxMode[which] = mode;
+      localStorage.setItem(FXMODE_KEY, JSON.stringify(fxMode));
+      applyFxMode();
+      updateFxHints();
+      updateFxStatus();
+      if(mode === "auto") refreshAutoRates();
+    }
+
+    function applyFxMode(){
+      document.querySelectorAll(".fxmode").forEach(box=>{
+        const which = box.getAttribute("data-fx");
+        const mode = fxMode[which] || "manual";
+        const manualBtn = box.querySelector(".manual");
+        const autoBtn = box.querySelector(".auto");
+        manualBtn.classList.toggle("active", mode === "manual");
+        autoBtn.classList.toggle("active", mode === "auto");
+
+        const inputId = which === "alipay" ? "zJpyPer10kRmb" : "vJpyPer10kRmb";
+        const input = document.getElementById(inputId);
+        if(input) input.disabled = (mode === "auto");
+      });
+      updateFxStatus();
+    }
+
+    document.querySelectorAll(".fxmode").forEach(box=>{
+      box.addEventListener("click",(e)=>{
+        const which = box.getAttribute("data-fx");
+        if(e.target.classList.contains("manual")) setFxMode(which, "manual");
+        if(e.target.classList.contains("auto")) setFxMode(which, "auto");
+      });
+    });
+
+    function updateFxHints(){
+      const alipayHint = $("fxhint-alipay");
+      const wechatHint = $("fxhint-wechat");
+
+      const modeA = fxMode.alipay || "manual";
+      const modeW = fxMode.wechat || "manual";
+
+      const aPct = n(state.settings.alipayAutoPct ?? 100.04, 100.04);
+      const wPct = n(state.settings.wechatAutoPct ?? 97.73, 97.73);
+
+      const aRaw = lastRaw.alipay;
+      const wRaw = lastRaw.wechat;
+      const t = lastRaw.fetchedAt ? ` · ${lastRaw.fetchedAt}` : "";
+
+      if(modeA === "auto" && Number.isFinite(aRaw)){
+        alipayHint.style.display = "inline-flex";
+        alipayHint.textContent = `raw ${aRaw.toFixed(4)} × ${aPct.toFixed(2)}%${t}`;
+      }else{
+        alipayHint.style.display = "none";
+        alipayHint.textContent = "";
+      }
+
+      if(modeW === "auto" && Number.isFinite(wRaw)){
+        wechatHint.style.display = "inline-flex";
+        wechatHint.textContent = `raw ${wRaw.toFixed(4)} × ${wPct.toFixed(2)}%${t}`;
+      }else{
+        wechatHint.style.display = "none";
+        wechatHint.textContent = "";
+      }
+    }
+
+    function calcRow(it, s){
+      const jpy = n(it.jpy, 0);
+      const qty = Math.max(1, n(it.qty, 1));
+
+      const promo1Mode = normPromoMode(it.promo1Mode ?? it.promoMode ?? "ALL", "ALL");
+      const promo2Mode = normPromoMode(it.promo2Mode ?? "ALL", "ALL");
+      const promo1OffPct = toOffPct(it.promo1OffPct ?? it.promoOffPct ?? 0, 0);
+      const promo2OffPct = toOffPct(it.promo2OffPct ?? 0, 0);
+
+      const taxFree = String(it.taxFree||"NO").toUpperCase() === "YES";
+      const taxRatePct = n(s.taxRatePct, 10);
+      const taxDivisor = 1 + (taxRatePct / 100);
+
+      function calcJpyAfterTax(channel){
+        let factor = 1;
+        if(promoApplies(promo1Mode, channel)) factor *= (1 - promo1OffPct / 100);
+        if(promoApplies(promo2Mode, channel)) factor *= (1 - promo2OffPct / 100);
+        const discounted = jpy * qty * factor;
+        return taxFree ? (discounted / taxDivisor) : discounted;
+      }
+
+      const jpyReady = calcJpyAfterTax("READY");
+      const jpyVx = calcJpyAfterTax("VX");
+      const jpyAlip = calcJpyAfterTax("ALIP");
+      const jpyMaster = calcJpyAfterTax("MASTER");
+
+      const usdcCny = calcUsdcCny(s);
+      const usdcM = jpyReady * (n(s.mJpyPer10kUsdc,0) / 10000);
+      const rmbU = usdcM * usdcCny;
+      const cbR = pct01(s.cashbackPct, 0);
+      const readyPreCap = rmbU * (1 - cbR);
+      const ready = applyCashbackCap(readyPreCap, rmbU, s.cashbackCapMode, s.cashbackCapAmount, "READY");
+
+      const vxRaw = jpyVx * (n(s.vJpyPer10kRmb,0) / 10000);
+      const zfbRaw = jpyAlip * (n(s.zJpyPer10kRmb,0) / 10000);
+      const vx = applyCashbackCap(vxRaw, vxRaw, s.cashbackCapMode, s.cashbackCapAmount, "VX");
+      const zfb = applyCashbackCap(zfbRaw, zfbRaw, s.cashbackCapMode, s.cashbackCapAmount, "ALIP");
+
+      const masterRaw = jpyMaster * (n(s.mJpyPer10kRmb,0) / 10000);
+      const master = applyCashbackCap(masterRaw, masterRaw, s.cashbackCapMode, s.cashbackCapAmount, "MASTER");
+      const cbN = pct01(s.cashbackNativePct, 0);
+      const masterNativePreCap = masterRaw * (1 - cbN);
+      const masterNative = applyCashbackCap(masterNativePreCap, masterRaw, s.cashbackCapMode, s.cashbackCapAmount, "MASTER");
+
+      const min = Math.min(ready, vx, zfb, master, masterNative);
+      let minLabel = "Master/原生";
+      let minKey = "MASTER_NATIVE";
+      if (ready === min){ minLabel = "Ready"; minKey = "READY"; }
+      else if (vx === min){ minLabel = "VX"; minKey = "VX"; }
+      else if (zfb === min){ minLabel = "ZFB"; minKey = "ALIP"; }
+      else if (master === min){ minLabel = "Master"; minKey = "MASTER"; }
+      else { minLabel = "Master/原生"; minKey = "MASTER_NATIVE"; }
+
+      const sell = jpy * (n(s.sellJpyPer10kRmb,0) / 10000) * qty;
+      const profit = sell - min;
+      const originMaster = jpy * (n(s.mJpyPer10kRmb,0) / 10000) * qty;
+
+      const jpyBase = (() => {
+        const base = String(s.breakevenBase || "VX").toUpperCase();
+        if(base === "VX") return jpyVx;
+        if(base === "ZFB") return jpyAlip;
+        if(base === "MASTER" || base === "MASTER_NATIVE") return jpyMaster;
+        return jpyVx;
+      })();
+
+      const basePrice = calcBasePrice(jpyBase, s);
+      const diffReadyBase = ready - basePrice;
+
+      return { ready, vx, zfb, master, masterNative, min, minLabel, minKey, sell, profit, originMaster, diffReadyBase };
+    }
+
+    function updateBreakevenOutputs(){
+      const s = state.settings;
+
+      const be = calcBreakEvenUsdtCny(s);
+      $("breakevenUsdtCny").value = Number.isFinite(be) ? be.toFixed(6) : "—";
+
+      const cur = n(s.usdtCny, NaN);
+      const delta = (Number.isFinite(cur) && Number.isFinite(be)) ? (cur - be) : NaN;
+      $("breakevenDeltaUsdt").value = Number.isFinite(delta) ? delta.toFixed(6) : "—";
+
+      let sum = 0;
+      for(const it of state.items){
+        const c = calcRow(it, s);
+        sum += (Number.isFinite(c.diffReadyBase) ? c.diffReadyBase : 0);
+      }
+      $("sumDiffReadyBase").value = Number.isFinite(sum) ? sum.toFixed(2) : "—";
+    }
+
+    function syncSettingsToUI(){
+      const s = state.settings;
+      $("mJpyPer10kUsdc").value = s.mJpyPer10kUsdc;
+      $("mJpyPer10kRmb").value  = s.mJpyPer10kRmb;
+      $("zJpyPer10kRmb").value  = s.zJpyPer10kRmb;
+      $("vJpyPer10kRmb").value  = s.vJpyPer10kRmb;
+      $("usdtCny").value        = s.usdtCny;
+      $("usdtDiv1").value       = s.usdtDiv1;
+      $("usdtDiv2").value       = s.usdtDiv2;
+
+      $("cashbackPct").value = s.cashbackPct;
+      $("cashbackNativePct").value = (s.cashbackNativePct ?? 0);
+
+      $("taxRatePct").value = s.taxRatePct;
+      setModeSwitch("cashbackCapModeSwitch", "cashbackCapMode", normPromoMode(s.cashbackCapMode || "OFF", "OFF"));
+      $("cashbackCapAmount").value = (s.cashbackCapAmount ?? 0);
+      $("sellJpyPer10kRmb").value = s.sellJpyPer10kRmb;
+
+      $("alipayAutoPct").value = (s.alipayAutoPct ?? 100.04);
+      $("wechatAutoPct").value = (s.wechatAutoPct ?? 97.73);
+
+      $("breakevenBase").value = String(s.breakevenBase || "VX").toUpperCase();
+
+      $("usdcCny").value = calcUsdcCny(s).toFixed(6);
+
+      updateBreakevenOutputs();
+    }
+
+    function syncUIToSettings(){
+      const s = state.settings;
+      s.mJpyPer10kUsdc = n($("mJpyPer10kUsdc").value, 0);
+      s.mJpyPer10kRmb  = n($("mJpyPer10kRmb").value, 0);
+      s.zJpyPer10kRmb  = n($("zJpyPer10kRmb").value, 0);
+      s.vJpyPer10kRmb  = n($("vJpyPer10kRmb").value, 0);
+      s.usdtCny        = n($("usdtCny").value, 0);
+      s.usdtDiv1       = n($("usdtDiv1").value, 0.9986);
+      s.usdtDiv2       = n($("usdtDiv2").value, 0.9945);
+
+      s.cashbackPct = n($("cashbackPct").value, 0);
+      s.cashbackNativePct = n($("cashbackNativePct").value, 0);
+
+      s.taxRatePct     = n($("taxRatePct").value, 0);
+      s.cashbackCapMode = normPromoMode($("cashbackCapMode").value || "OFF", "OFF");
+      s.cashbackCapAmount = Math.max(0, n($("cashbackCapAmount").value, 0));
+      s.sellJpyPer10kRmb = n($("sellJpyPer10kRmb").value, 0);
+
+      s.alipayAutoPct  = n($("alipayAutoPct").value, 100.04);
+      s.wechatAutoPct  = n($("wechatAutoPct").value, 97.73);
+
+      s.breakevenBase = String($("breakevenBase").value || "VX").toUpperCase();
+
+      $("usdcCny").value = calcUsdcCny(s).toFixed(6);
+      updateBreakevenOutputs();
+
+      saveState();
+      render();
+      updateFxHints();
+      updateFxStatus();
+
+      if((fxMode.alipay||"manual")==="auto" || (fxMode.wechat||"manual")==="auto"){
+        refreshAutoRates();
+      }
+    }
+
+    [
+      "mJpyPer10kUsdc","mJpyPer10kRmb","zJpyPer10kRmb","vJpyPer10kRmb",
+      "usdtCny","usdtDiv1","usdtDiv2",
+      "cashbackPct","cashbackNativePct","taxRatePct","cashbackCapMode","cashbackCapAmount","sellJpyPer10kRmb",
+      "alipayAutoPct","wechatAutoPct",
+      "breakevenBase"
+    ].forEach(id => $(id).addEventListener("input", syncUIToSettings));
+
+    function migrateItems(){
+      for(const it of state.items){
+        if(it.category == null) it.category = "";
+
+        if(it.promo1Mode == null){
+          if(it.promoMode != null){
+            it.promo1Mode = normPromoMode(it.promoMode, "ALL");
+          }else{
+            it.promo1Mode = "ALL";
+          }
+        }else{
+          it.promo1Mode = normPromoMode(it.promo1Mode, "ALL");
+        }
+
+        if(it.promo1OffPct == null){
+          if(it.promoOffPct != null){
+            it.promo1OffPct = toOffPct(it.promoOffPct, 0);
+          }else if(it.discountPct != null){
+            it.promo1OffPct = payToOffPct(it.discountPct, 0);
+            delete it.discountPct;
+          }else if(it.discountFactor != null){
+            it.promo1OffPct = payToOffPct(it.discountFactor, 0);
+            delete it.discountFactor;
+          }else{
+            it.promo1OffPct = 0;
+          }
+        }else{
+          it.promo1OffPct = toOffPct(it.promo1OffPct, 0);
+        }
+
+        it.promo2Mode = normPromoMode(it.promo2Mode ?? "ALL", "ALL");
+        it.promo2OffPct = toOffPct(it.promo2OffPct ?? 0, 0);
+
+        delete it.promoMode;
+        delete it.promoOffPct;
+
+        if(!it.taxFree) it.taxFree = "NO";
+      }
+      state.settings.cashbackCapMode = normPromoMode(state.settings.cashbackCapMode || "OFF", "OFF");
+      state.settings.cashbackCapAmount = Math.max(0, n(state.settings.cashbackCapAmount ?? 0, 0));
+      saveState();
+    }
+
+
+    [
+      "platform","category","name","jpy","qty","promo1Mode","promo1OffPct","promo2Mode","promo2OffPct"
+    ].forEach(id => {
+      const el = $(id);
+      if(el) el.addEventListener("input", renderKpis);
+      if(el) el.addEventListener("change", renderKpis);
+    });
+    document.getElementById('taxFreeToggle').addEventListener('click', ()=>setTimeout(renderKpis, 0));
+
+    function addItem(){
+      const it = {
+        id: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random()),
+        platform: ($("platform").value || "").trim(),
+        category: ($("category").value || "").trim(),
+        name: ($("name").value || "").trim() || "(未命名)",
+        jpy: n($("jpy").value, 0),
+        qty: Math.max(1, n($("qty").value, 1)),
+        promo1Mode: normPromoMode($("promo1Mode").value || "ALL", "ALL"),
+        promo1OffPct: toOffPct($("promo1OffPct").value, 0),
+        promo2Mode: normPromoMode($("promo2Mode").value || "ALL", "ALL"),
+        promo2OffPct: toOffPct($("promo2OffPct").value, 0),
+        taxFree: getTaxFreeFromToggle()
+      };
+      state.items.unshift(it);
+      saveState();
+      render();
+    }
+    $("btnAdd").addEventListener("click", addItem);
+
+    $("btnExport").addEventListener("click", ()=>{
+      const blob = new Blob([JSON.stringify(state, null, 2)], {type:"application/json"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = "ready-v1.json";
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    $("btnImport").addEventListener("click", ()=>{
+      const inp = document.createElement("input");
+      inp.type = "file"; inp.accept = "application/json";
+      inp.onchange = async () => {
+        const f = inp.files && inp.files[0];
+        if(!f) return;
+        try{
+          const s = JSON.parse(await f.text());
+          state = {
+            settings: { ...defaultState().settings, ...(s.settings||{}) },
+            items: Array.isArray(s.items) ? s.items : []
+          };
+          saveState();
+          migrateItems();
+          syncSettingsToUI();
+          render();
+          updateFxHints();
+          updateFxStatus();
+        }catch(e){
+          alert("JSON 解析失败：" + (e?.message || e));
+        }
+      };
+      inp.click();
+    });
+
+    $("btnReset").addEventListener("click", ()=>{
+      if(!confirm("确定重置？会清空本机保存数据。")) return;
+      state = defaultState();
+      saveState();
+      syncSettingsToUI();
+      setTaxFreeToggle("NO");
+
+      fxMode.alipay = "manual";
+      fxMode.wechat = "manual";
+      localStorage.setItem(FXMODE_KEY, JSON.stringify(fxMode));
+      applyFxMode();
+
+      render();
+      updateFxHints();
+      updateFxStatus();
+    });
+
+    function getDraftItemFromForm(){
+      return {
+        id: "__draft__",
+        platform: ($("platform").value || "").trim(),
+        category: ($("category").value || "").trim(),
+        name: (($("name").value || "").trim() || "(未命名)"),
+        jpy: n($("jpy").value, 0),
+        qty: Math.max(1, n($("qty").value, 1)),
+        promo1Mode: normPromoMode($("promo1Mode").value || "ALL", "ALL"),
+        promo1OffPct: toOffPct($("promo1OffPct").value, 0),
+        promo2Mode: normPromoMode($("promo2Mode").value || "ALL", "ALL"),
+        promo2OffPct: toOffPct($("promo2OffPct").value, 0),
+        taxFree: getTaxFreeFromToggle()
+      };
+    }
+
+    function formatMoneyMaybe(v, enabled=true){
+      return (enabled && Number.isFinite(v)) ? v.toFixed(2) : "—";
+    }
+
+    function renderKpis(){
+      const s = state.settings;
+      let sumMin=0, sumProfit=0;
+
+      for(const it of state.items){
+        const c = calcRow(it, s);
+        sumMin += c.min;
+        sumProfit += c.profit;
+      }
+
+      const draft = getDraftItemFromForm();
+      const hasDraft = n(draft.jpy, 0) > 0;
+      const dc = hasDraft ? calcRow(draft, s) : null;
+
+      const bestClassMap = {
+        READY: "best-ready",
+        MASTER: "best-master",
+        MASTER_NATIVE: "best-master-native",
+        VX: "best-vx",
+        ALIP: "best-alip"
+      };
+
+      const bestLabelMap = {
+        READY: "Ready",
+        MASTER: "Master",
+        MASTER_NATIVE: "Master原生",
+        VX: "VX",
+        ALIP: "Alipay"
+      };
+
+      const kpis = [
+        {k:"新增价格（最优）", v: formatMoneyMaybe(dc?.min, hasDraft), vc: hasDraft ? (bestClassMap[dc?.minKey] || "") : ""},
+        {k:"新增价格（Ready）", v: formatMoneyMaybe(dc?.ready, hasDraft)},
+        {k:"新增价格（VX）", v: formatMoneyMaybe(dc?.vx, hasDraft)},
+        {k:"清单合计价格（最优）", v: formatMoneyMaybe(sumMin, true)},
+        {k:"最优渠道", v: hasDraft ? (bestLabelMap[dc?.minKey] || "—") : "—", vc: hasDraft ? ("best-channel " + (bestClassMap[dc?.minKey] || "")) : "best-channel"},
+        {k:"新增价格（Master原生）", v: formatMoneyMaybe(dc?.masterNative, hasDraft)},
+        {k:"新增价格（Alipay）", v: formatMoneyMaybe(dc?.zfb, hasDraft)},
+        {k:"合计（PROFIT）", v: formatMoneyMaybe(sumProfit, true)}
+      ];
+
+      $("kpis").innerHTML = kpis.map(x=>`
+        <div class="kpi">
+          <div class="k">${esc(x.k)}</div>
+          <div class="v ${esc(x.vc || "")}">${esc(x.v)}</div>
+        </div>
+      `).join("");
+    }
+
+    function renderTable(){
+      const s = state.settings;
+      const tb = $("tbody");
+
+      tb.innerHTML = state.items.map((it, idx)=>{
+        const c = calcRow(it, s);
+
+        const minClass =
+          c.minLabel==="Ready" ? "min-ok" :
+          c.minLabel==="VX" ? "min-warn" :
+          c.minLabel==="ZFB" ? "min-ok" :
+          c.minLabel==="Master" ? "min-bad" : "min-bad";
+
+        return `
+          <tr data-id="${esc(it.id)}">
+            <td>${idx+1}</td>
+            <td contenteditable="true" data-k="name">${esc(it.name)}</td>
+            <td contenteditable="true" data-k="jpy">${esc(it.jpy)}</td>
+            <td contenteditable="true" data-k="qty">${esc(it.qty)}</td>
+
+            <td class="promo-cell">
+              <select class="table-control" data-k="promo1ModeRow">
+                <option value="ALL" ${normPromoMode(it.promo1Mode,"ALL")==="ALL" ? "selected" : ""}>ALL</option>
+                <option value="READY" ${normPromoMode(it.promo1Mode,"ALL")==="READY" ? "selected" : ""}>R</option>
+                <option value="MASTER" ${normPromoMode(it.promo1Mode,"ALL")==="MASTER" ? "selected" : ""}>M</option>
+                <option value="VX" ${normPromoMode(it.promo1Mode,"ALL")==="VX" ? "selected" : ""}>VX</option>
+                <option value="ALIP" ${normPromoMode(it.promo1Mode,"ALL")==="ALIP" ? "selected" : ""}>AP</option>
+              </select>
+            </td>
+            <td contenteditable="true" data-k="promo1OffPct">${esc(toOffPct(it.promo1OffPct,0))}</td>
+
+            <td class="promo-cell">
+              <select class="table-control" data-k="promo2ModeRow">
+                <option value="ALL" ${normPromoMode(it.promo2Mode,"ALL")==="ALL" ? "selected" : ""}>ALL</option>
+                <option value="READY" ${normPromoMode(it.promo2Mode,"ALL")==="READY" ? "selected" : ""}>R</option>
+                <option value="MASTER" ${normPromoMode(it.promo2Mode,"ALL")==="MASTER" ? "selected" : ""}>M</option>
+                <option value="VX" ${normPromoMode(it.promo2Mode,"ALL")==="VX" ? "selected" : ""}>VX</option>
+                <option value="ALIP" ${normPromoMode(it.promo2Mode,"ALL")==="ALIP" ? "selected" : ""}>AP</option>
+              </select>
+            </td>
+            <td contenteditable="true" data-k="promo2OffPct">${esc(toOffPct(it.promo2OffPct,0))}</td>
+
+            <td>
+              <div class="toggle small" data-k="taxFreeToggleRow">
+                <button type="button" data-v="NO" class="${String(it.taxFree).toUpperCase()==='YES' ? '' : 'active'}">NO</button>
+                <button type="button" data-v="YES" class="${String(it.taxFree).toUpperCase()==='YES' ? 'active' : ''}">YES</button>
+              </div>
+            </td>
+
+            <td class="${minClass}">${Number.isFinite(c.min)?c.min.toFixed(2):""}</td>
+            <td class="${minClass}">${esc(c.minLabel)}</td>
+
+            <td>${Number.isFinite(c.sell)?c.sell.toFixed(2):""}</td>
+            <td class="${c.profit>=0 ? "min-ok":"min-bad"}">${Number.isFinite(c.profit)?c.profit.toFixed(2):""}</td>
+            <td>${Number.isFinite(c.originMaster)?c.originMaster.toFixed(2):""}</td>
+
+            <td><button class="btn ghost" data-act="del">删除</button></td>
+          </tr>
+        `;
+      }).join("");
+
+      tb.querySelectorAll('button[data-act="del"]').forEach(btn=>{
+        btn.addEventListener("click", (e)=>{
+          const tr = e.target.closest("tr");
+          const id = tr?.getAttribute("data-id");
+          if(!id) return;
+          state.items = state.items.filter(x=>x.id !== id);
+          saveState();
+          render();
+        });
+      });
+
+      tb.querySelectorAll('[data-k="taxFreeToggleRow"]').forEach(box=>{
+        box.addEventListener('click', (e)=>{
+          const btn = e.target.closest('button[data-v]');
+          if(!btn) return;
+          const tr = e.target.closest('tr');
+          const id = tr?.getAttribute('data-id');
+          if(!id) return;
+
+          const it = state.items.find(x=>x.id === id);
+          if(!it) return;
+
+          it.taxFree = btn.getAttribute('data-v');
+          saveState();
+          render();
+        });
+      });
+
+      tb.querySelectorAll('[data-k="promo1ModeRow"], [data-k="promo2ModeRow"]').forEach(sel=>{
+        sel.addEventListener("change", (e)=>{
+          const tr = e.target.closest("tr");
+          const id = tr?.getAttribute("data-id");
+          if(!id) return;
+          const it = state.items.find(x=>x.id === id);
+          if(!it) return;
+          if(e.target.getAttribute("data-k") === "promo1ModeRow"){
+            it.promo1Mode = normPromoMode(e.target.value, "ALL");
+          }else{
+            it.promo2Mode = normPromoMode(e.target.value, "ALL");
+          }
+          saveState();
+          render();
+        });
+      });
+
+      tb.querySelectorAll('[contenteditable="true"]').forEach(cell=>{
+        cell.addEventListener("blur", (e)=>{
+          const td = e.target;
+          const tr = td.closest("tr");
+          const id = tr.getAttribute("data-id");
+          const k = td.getAttribute("data-k");
+          const val = td.innerText.trim();
+
+          const it = state.items.find(x=>x.id === id);
+          if(!it) return;
+
+          if(k === "jpy" || k === "qty"){
+            it[k] = n(val, 0);
+            if(k === "qty") it[k] = Math.max(1, it[k]);
+          }else if(k === "promo1OffPct" || k === "promo2OffPct"){
+            it[k] = toOffPct(val, 0);
+          }else{
+            it[k] = val;
+          }
+
+          saveState();
+          render();
+        });
+      });
+    }
+
+    function render(){
+      $("usdcCny").value = calcUsdcCny(state.settings).toFixed(6);
+      updateBreakevenOutputs();
+      renderKpis();
+      renderTable();
+      updateFxHints();
+      updateFxStatus();
+    }
+
+    async function fetchRatesJson(){
+      const resp = await fetch("./rates.json?v=" + Date.now(), { cache: "no-store" });
+      if(!resp.ok) throw new Error("rates.json fetch failed: " + resp.status);
+      return await resp.json();
+    }
+
+    async function refreshAutoRates(){
+      try{
+        const r = await fetchRatesJson();
+
+        const rawAlipay = Number(r.alipay_jpy_per_10k_rmb);
+        const rawWechat = Number(r.wechat_jpy_per_10k_rmb);
+
+        lastRaw.alipay = rawAlipay;
+        lastRaw.wechat = rawWechat;
+
+        if(r.fetched_at_utc){
+          const d = new Date(r.fetched_at_utc);
+          lastRaw.fetchedAt = !isNaN(d.getTime()) ? d.toLocaleString() : String(r.fetched_at_utc);
+        }else{
+          lastRaw.fetchedAt = "";
+        }
+
+        const aPct = n(state.settings.alipayAutoPct ?? 100.04, 100.04) / 100;
+        const wPct = n(state.settings.wechatAutoPct ?? 97.73, 97.73) / 100;
+
+        const alipayAdj = Number.isFinite(rawAlipay) ? (rawAlipay * aPct) : NaN;
+        const wechatAdj = Number.isFinite(rawWechat) ? (rawWechat * wPct) : NaN;
+
+        if(Number.isFinite(alipayAdj) && (fxMode.alipay || "manual") === "auto"){
+          $("zJpyPer10kRmb").value = alipayAdj.toFixed(4);
+        }
+        if(Number.isFinite(wechatAdj) && (fxMode.wechat || "manual") === "auto"){
+          $("vJpyPer10kRmb").value = wechatAdj.toFixed(4);
+        }
+
+        ["zJpyPer10kRmb","vJpyPer10kRmb"].forEach(id=>{
+          const el = $(id);
+          if(el) el.dispatchEvent(new Event("input", { bubbles:true }));
+        });
+
+        updateFxHints();
+        updateFxStatus();
+      }catch(err){
+        console.warn("Auto rate refresh failed:", err);
+        updateFxHints();
+        updateFxStatus();
+      }
+    }
+
+    async function loadAvatar(){
+      const img = document.getElementById('avatarImg');
+      const fb = document.getElementById('avatarFallback');
+
+      const candidates = [
+        "avatar.png","avatar.jpg","avatar.jpeg","avatar.webp",
+        "profile.png","profile.jpg","profile.jpeg",
+        "icon.png","icon.jpg","icon.jpeg",
+        "head.png","head.jpg","me.png","me.jpg"
+      ];
+
+      function tryOne(src){
+        return new Promise((resolve)=>{
+          const t = new Image();
+          t.onload = ()=> resolve(src);
+          t.onerror = ()=> resolve(null);
+          t.src = src + "?v=" + Date.now();
+        });
+      }
+
+      for(const c of candidates){
+        const ok = await tryOne("./" + c);
+        if(ok){
+          img.src = ok;
+          img.style.display = "block";
+          fb.style.display = "none";
+          return;
+        }
+      }
+    }
+
+    // Excel import
+    function normKey(s){
+      return String(s||"").trim().toLowerCase().replace(/\s+/g,"");
+    }
+    function truthyYes(v){
+      const s = String(v ?? "").trim().toUpperCase();
+      if(s === "YES" || s === "Y" || s === "TRUE" || s === "1") return true;
+      if(s === "NO" || s === "N" || s === "FALSE" || s === "0") return false;
+      // 中文
+      if(s === "是") return true;
+      if(s === "否") return false;
+      return false;
+    }
+    function mapRow(obj){
+      const out = {};
+      for(const k in obj) out[normKey(k)] = obj[k];
+      return out;
+    }
+    function pick(m, keys){
+      for(const k of keys){
+        const kk = normKey(k);
+        if(kk in m) return m[kk];
+      }
+      return undefined;
+    }
+
+    $("btnImportExcel").addEventListener("click", ()=> $("excelFile").click());
+    $("excelFile").addEventListener("change", async (e)=>{
+      const f = e.target.files && e.target.files[0];
+      e.target.value = "";
+      if(!f) return;
+
+      try{
+        const ab = await f.arrayBuffer();
+        const wb = XLSX.read(ab, {type:"array"});
+        const sheetName = wb.SheetNames[0];
+        if(!sheetName) throw new Error("找不到 Sheet");
+        const ws = wb.Sheets[sheetName];
+
+        const json = XLSX.utils.sheet_to_json(ws, {defval:""});
+        const items = [];
+
+        for(const raw of json){
+          const m = mapRow(raw);
+
+          const platform = String(pick(m, ["平台","platform"]) ?? "").trim();
+          const category = String(pick(m, ["商品分类","分类","category"]) ?? "").trim();
+          const name = String(pick(m, ["商品名","名称","name","title"]) ?? "").trim();
+
+          const jpy = n(pick(m, ["JPY","jpy","日元","单价","价格"]), 0);
+          const qty = Math.max(1, n(pick(m, ["数量","qty","count"]), 1));
+
+          // 折扣/优惠：支持 payFactor(0.85/85) 或 offPct(15/0.15) 两种
+          const discountLike = pick(m, ["折扣","折扣幅度","支付比例","pay","discount","discountpct","discountfactor"]);
+          const offLike = pick(m, ["优惠幅度","优惠%","off","offpct","promooffpct"]);
+
+          let promo1OffPct = 0;
+          if(offLike !== undefined && offLike !== ""){
+            promo1OffPct = toOffPct(offLike, 0);
+          }else if(discountLike !== undefined && discountLike !== ""){
+            promo1OffPct = payToOffPct(discountLike, 0);
+          }
+
+          const taxfreeRaw = pick(m, ["免税","是否免税","taxfree","tax_free"]);
+          const taxFree = truthyYes(taxfreeRaw) ? "YES" : "NO";
+
+          if(!name && !platform && jpy === 0) continue;
+
+          items.push({
+            id: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random()),
+            platform, category,
+            name: name || "(未命名)",
+            jpy, qty,
+            promo1Mode: "ALL",
+            promo1OffPct,
+            promo2Mode: "ALL",
+            promo2OffPct: 0,
+            taxFree
+          });
+        }
+
+        if(items.length === 0){
+          alert("未识别到可导入的行。请确认表头/列名。");
+          return;
+        }
+
+        state.items = items.concat(state.items);
+        saveState();
+        render();
+      }catch(err){
+        alert("Excel 导入失败：" + (err?.message || err));
+      }
+    });
+
+    // Init
+    bindModeSwitch("cashbackCapModeSwitch", "cashbackCapMode", "OFF");
+    bindModeSwitch("promo1ModeSwitch", "promo1Mode", "ALL");
+    bindModeSwitch("promo2ModeSwitch", "promo2Mode", "ALL");
+    migrateItems();
+    syncSettingsToUI();
+    setTaxFreeToggle("NO");
+    applyFxMode();
+    updateFxAutoPctVisibility();
+    render();
+    loadAvatar();
+
+    refreshAutoRates();
+    setInterval(refreshAutoRates, 5 * 60 * 1000);
+  </script>
+</body>
+</html>
