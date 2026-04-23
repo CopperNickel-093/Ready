@@ -1,7 +1,7 @@
 {
   "source": "Frankfurter (ECB reference, daily updated)",
-  "fetched_at_utc": "2026-04-23T14:07:07.310Z",
-  "date": "2026-04-22",
+  "fetched_at_utc": "2026-04-23T16:47:57.544Z",
+  "date": "2026-04-23",
   "base": "JPY",
   "quote": "CNY",
   "cny_per_jpy": 0.04286,
